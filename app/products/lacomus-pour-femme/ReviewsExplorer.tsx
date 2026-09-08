@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import base from './reviews.module.css';
+import SpotlightCard from '../../components/react-bits/SpotlightCard';
 import enhanced from './reviews-enhanced.module.css';
 
 export type ReviewPicture = {
@@ -46,10 +46,15 @@ function stars(rating: number) {
   return `${'★'.repeat(rounded)}${'☆'.repeat(5 - rounded)}`;
 }
 
+function reviewPhoto(review: ReviewItem) {
+  const picture = review.pictures_urls?.[0];
+  return picture?.huge || picture?.original || picture?.small || '';
+}
+
 export default function ReviewsExplorer({ reviews, totalCount, officialProduct }: Props) {
   const [filter, setFilter] = useState<Filter>('all');
   const [sort, setSort] = useState<Sort>('newest');
-  const [limit, setLimit] = useState(6);
+  const [limit, setLimit] = useState(7);
 
   const counts = useMemo(() => ({
     all: reviews.length,
@@ -78,31 +83,26 @@ export default function ReviewsExplorer({ reviews, totalCount, officialProduct }
   }, [filter, reviews, sort]);
 
   const visible = filtered.slice(0, limit);
+  const featured = visible.reduce<ReviewItem | undefined>((best, review) => {
+    if (!best) return review;
+    return (review.body?.length ?? 0) > (best.body?.length ?? 0) ? review : best;
+  }, undefined);
+  const remaining = visible.filter((review) => review.uuid !== featured?.uuid);
 
   const selectFilter = (next: Filter) => {
     setFilter(next);
-    setLimit(6);
+    setLimit(7);
   };
 
   return (
     <div className={enhanced.explorer}>
       <div className={enhanced.reviewToolbar}>
         <div className={enhanced.filterGroup} aria-label="Filter recent reviews">
-          <button className={filter === 'all' ? enhanced.activeFilter : ''} onClick={() => selectFilter('all')} type="button">
-            All <span>{counts.all}</span>
-          </button>
-          <button className={filter === 'verified' ? enhanced.activeFilter : ''} onClick={() => selectFilter('verified')} type="button">
-            Verified <span>{counts.verified}</span>
-          </button>
-          <button className={filter === 'media' ? enhanced.activeFilter : ''} onClick={() => selectFilter('media')} type="button">
-            With photos <span>{counts.media}</span>
-          </button>
-          <button className={filter === '5' ? enhanced.activeFilter : ''} onClick={() => selectFilter('5')} type="button">
-            5 stars <span>{counts.five}</span>
-          </button>
-          <button className={filter === '4' ? enhanced.activeFilter : ''} onClick={() => selectFilter('4')} type="button">
-            4 stars <span>{counts.four}</span>
-          </button>
+          <button className={filter === 'all' ? enhanced.activeFilter : ''} onClick={() => selectFilter('all')} type="button">All <span>{counts.all}</span></button>
+          <button className={filter === 'verified' ? enhanced.activeFilter : ''} onClick={() => selectFilter('verified')} type="button">Verified <span>{counts.verified}</span></button>
+          <button className={filter === 'media' ? enhanced.activeFilter : ''} onClick={() => selectFilter('media')} type="button">With photos <span>{counts.media}</span></button>
+          <button className={filter === '5' ? enhanced.activeFilter : ''} onClick={() => selectFilter('5')} type="button">5 stars <span>{counts.five}</span></button>
+          <button className={filter === '4' ? enhanced.activeFilter : ''} onClick={() => selectFilter('4')} type="button">4 stars <span>{counts.four}</span></button>
         </div>
 
         <label className={enhanced.sortControl}>
@@ -120,55 +120,89 @@ export default function ReviewsExplorer({ reviews, totalCount, officialProduct }
         <span>{totalCount} total reviews on the official LACOMUS product page</span>
       </div>
 
-      {visible.length > 0 ? (
-        <div className={base.reviewGrid}>
-          {visible.map((review, index) => {
-            const picture = review.pictures_urls?.[0];
-            const pictureSrc = picture?.huge || picture?.original || picture?.small || '';
+      {featured ? (
+        <>
+          <SpotlightCard className={enhanced.featuredCard} spotlightColor="rgba(217,185,80,.12)">
+            <div className={enhanced.featuredMeta}>
+              <span>FEATURED CUSTOMER NOTE</span>
+              <span className={enhanced.featuredStars}>{stars(featured.rating)}</span>
+            </div>
 
-            return (
-              <article className={base.reviewCard} key={review.uuid}>
-                <div className={base.cardTop}>
-                  <span className={base.cardStars} aria-label={`${review.rating} out of 5 stars`}>
-                    {stars(review.rating)}
-                  </span>
-                  <span className={base.index}>{String(index + 1).padStart(2, '0')}</span>
-                </div>
+            <div className={`${enhanced.featuredBody} ${reviewPhoto(featured) ? enhanced.withFeaturedPhoto : ''}`}>
+              {reviewPhoto(featured) && (
+                <figure className={enhanced.featuredPhoto}>
+                  <img src={reviewPhoto(featured)} alt={`Review photo from ${featured.reviewer_name || 'a LACOMUS customer'}`} loading="lazy" />
+                  <figcaption>Customer photo</figcaption>
+                </figure>
+              )}
 
-                {pictureSrc && (
-                  <figure className={enhanced.inlineMedia}>
-                    <img src={pictureSrc} alt={`Review photo from ${review.reviewer_name || 'a LACOMUS customer'}`} loading="lazy" />
-                    <figcaption>Customer photo</figcaption>
-                  </figure>
-                )}
-
-                <blockquote>“{review.body || 'Customer rating submitted for LACOMUS Pour Femme.'}”</blockquote>
-
-                <footer>
-                  <div className={base.avatar} aria-hidden="true">
-                    {(review.reviewer_initial || review.reviewer_name?.[0] || 'L').toUpperCase()}
-                  </div>
-                  <div className={base.reviewer}>
-                    <strong>{review.reviewer_name || 'Anonymous'}</strong>
-                    <span className={review.verified_buyer ? enhanced.verified : enhanced.unverified}>
-                      {review.verified_buyer ? '✓ Verified Buyer' : 'Customer Review'}
+              <div className={enhanced.featuredQuote}>
+                <div className={enhanced.quoteMark}>“</div>
+                <blockquote>{featured.body || 'Customer rating submitted for LACOMUS Pour Femme.'}</blockquote>
+                <div className={enhanced.featuredFooter}>
+                  <div className={enhanced.avatar}>{(featured.reviewer_initial || featured.reviewer_name?.[0] || 'L').toUpperCase()}</div>
+                  <div>
+                    <strong>{featured.reviewer_name || 'Anonymous'}</strong>
+                    <span className={featured.verified_buyer ? enhanced.verified : enhanced.unverified}>
+                      {featured.verified_buyer ? '✓ Verified Buyer' : 'Customer Review'}
                     </span>
                   </div>
-                  <time dateTime={review.created_at}>{formatDate(review.created_at)}</time>
-                </footer>
-              </article>
-            );
-          })}
-        </div>
+                  <time dateTime={featured.created_at}>{formatDate(featured.created_at)}</time>
+                </div>
+              </div>
+            </div>
+          </SpotlightCard>
+
+          <div className={enhanced.wallLabel}>
+            <span>MORE CUSTOMER VOICES</span>
+            <span>Move your cursor across a card</span>
+          </div>
+
+          <div className={enhanced.reviewWall}>
+            {remaining.map((review, index) => {
+              const pictureSrc = reviewPhoto(review);
+              return (
+                <SpotlightCard
+                  className={enhanced.reviewSpotlight}
+                  spotlightColor={index % 2 === 0 ? 'rgba(217,185,80,.10)' : 'rgba(177,63,77,.12)'}
+                  key={review.uuid}
+                >
+                  <article className={enhanced.reviewCard}>
+                    <div className={enhanced.cardTop}>
+                      <span className={enhanced.cardStars} aria-label={`${review.rating} out of 5 stars`}>{stars(review.rating)}</span>
+                      <span className={enhanced.index}>{String(index + 2).padStart(2, '0')}</span>
+                    </div>
+
+                    {pictureSrc && (
+                      <figure className={enhanced.inlineMedia}>
+                        <img src={pictureSrc} alt={`Review photo from ${review.reviewer_name || 'a LACOMUS customer'}`} loading="lazy" />
+                        <figcaption>Customer photo</figcaption>
+                      </figure>
+                    )}
+
+                    <blockquote>“{review.body || 'Customer rating submitted for LACOMUS Pour Femme.'}”</blockquote>
+
+                    <footer>
+                      <div className={enhanced.avatar} aria-hidden="true">{(review.reviewer_initial || review.reviewer_name?.[0] || 'L').toUpperCase()}</div>
+                      <div className={enhanced.reviewer}>
+                        <strong>{review.reviewer_name || 'Anonymous'}</strong>
+                        <span className={review.verified_buyer ? enhanced.verified : enhanced.unverified}>{review.verified_buyer ? '✓ Verified Buyer' : 'Customer Review'}</span>
+                      </div>
+                      <time dateTime={review.created_at}>{formatDate(review.created_at)}</time>
+                    </footer>
+                  </article>
+                </SpotlightCard>
+              );
+            })}
+          </div>
+        </>
       ) : (
         <div className={enhanced.emptyState}>No recent reviews match this filter.</div>
       )}
 
       <div className={enhanced.reviewActions}>
         {visible.length < filtered.length && (
-          <button type="button" onClick={() => setLimit((current) => current + 6)}>
-            Show more reviews
-          </button>
+          <button type="button" onClick={() => setLimit((current) => current + 6)}>Show more reviews</button>
         )}
         <a href={officialProduct} target="_blank" rel="noreferrer">View all {totalCount} reviews on LACOMUS ↗</a>
       </div>
