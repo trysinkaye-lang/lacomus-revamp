@@ -86,7 +86,10 @@ export default function PourFemmePage() {
           <FadeContent blur={false} duration={0.75} threshold={0.12}>
             <div className={styles.productPanelInner}>
               <div className={styles.kicker}>POUR FEMME / EAU DE PARFUM</div>
-              <h1>Pink<br />Sapphire</h1>
+              <h1 className={styles.productTitle}>
+                <span className={styles.titlePrimary}>Pink</span>
+                <span className={styles.titleGemPink}>Sapphire</span>
+              </h1>
               <p className={styles.mood}>Elegant · Warm · Captivating</p>
 
               <p className={styles.heroStory}>A quiet signature for the woman who carries softness with confidence—warm, polished and unforgettable without asking for attention.</p>
