@@ -5,7 +5,7 @@ import FadeContent from './react-bits/FadeContent';
 import GlareHover from './react-bits/GlareHover';
 
 const HOMME_IMAGE = 'https://cdn.shopify.com/s/files/1/0712/6129/0632/files/HRS03073_1.jpg?v=1777867751';
-const FEMME_IMAGE = 'https://d8j0ntlcm91z4.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/hf_20260908_092605_eb19eae5-b1a7-48e7-944e-59bd66bd136e.png';
+const FEMME_IMAGE = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/17891e69-12d7-49a7-ac06-132282220e8e.png';
 
 type Category = 'homme' | 'femme';
 
@@ -76,7 +76,7 @@ export default function FragranceCategories() {
             glareSize={190}
             transitionDuration={900}
           >
-            <img src={FEMME_IMAGE} alt="LACOMUS Pink Sapphire feminine fragrance campaign" loading="lazy" />
+            <img src={FEMME_IMAGE} alt="LACOMUS Pink Sapphire feminine fragrance campaign with jewelry" loading="lazy" />
             <div className="category-shade category-shade-femme" aria-hidden="true" />
             <div className="category-number" aria-hidden="true">02</div>
             <div className="category-copy">
@@ -184,7 +184,7 @@ export default function FragranceCategories() {
         }
 
         .category-card-femme img {
-          object-position: 52% center;
+          object-position: 56% 52%;
         }
 
         .category-card:hover img,
@@ -357,7 +357,7 @@ export default function FragranceCategories() {
           }
 
           .category-card-femme img {
-            object-position: 57% center;
+            object-position: 57% 50%;
           }
 
           .category-copy {
