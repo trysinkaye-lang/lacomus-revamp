@@ -1,5 +1,6 @@
 import FadeContent from '../../components/react-bits/FadeContent';
 import DepthCarousel from '../../components/react-bits/DepthCarousel';
+import ReviewsSection from './ReviewsSection';
 import styles from '../lacomus-pour-homme/product.module.css';
 
 const OFFICIAL_PRODUCT = 'https://lacomusph.com/products/lacomus-pour-femme';
@@ -127,17 +128,7 @@ export default function PourFemmePage() {
         ))}
       </section>
 
-      <section className={styles.reviews}>
-        <div>
-          <p>VERIFIED REVIEWS</p>
-          <h2>4.8 / 5</h2>
-        </div>
-        <div className={styles.reviewCopy}>
-          <strong>355 customer reviews on the official LACOMUS product page.</strong>
-          <p>The revamp keeps the product story cinematic while purchases and the complete verified-review feed remain on LACOMUS’ official storefront.</p>
-          <a href={OFFICIAL_PRODUCT} target="_blank" rel="noreferrer">Read verified reviews ↗</a>
-        </div>
-      </section>
+      <ReviewsSection />
 
       <footer className={styles.footer}>
         <a className={styles.wordmark} href="/">LACOMUS</a>
