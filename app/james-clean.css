@@ -1,0 +1,71 @@
+.james-section{
+  position:relative;
+  min-height:100svh;
+  overflow:hidden;
+  background-color:#120f0d;
+  background-image:url('https://lacomusph.com/cdn/shop/files/lacomus-lifestyle-photography-10.jpg?v=1777665204');
+  background-size:cover;
+  background-position:center 46%;
+  background-repeat:no-repeat;
+}
+
+.james-section>img{display:none}
+
+.james-shade{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(0deg,rgba(5,7,11,.34) 0,rgba(5,7,11,.05) 44%,rgba(5,7,11,.08) 100%);
+  pointer-events:none;
+}
+
+.james-copy{
+  position:relative;
+  z-index:2;
+  min-height:100svh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  text-align:center;
+}
+
+.james-copy>p,
+.james-copy>h2,
+.james-copy>span,
+.james-copy>a{display:none!important}
+
+.james-brand{
+  position:relative;
+  left:auto;
+  top:auto;
+  transform:none;
+  margin:0;
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:clamp(82px,11vw,172px);
+  line-height:.9;
+  letter-spacing:.035em;
+  color:#d8b456;
+  white-space:nowrap;
+  mix-blend-mode:normal;
+  text-shadow:0 2px 28px rgba(0,0,0,.36);
+  pointer-events:none;
+}
+
+@media(max-width:760px){
+  .james-section{
+    min-height:92svh;
+    background-position:56% center;
+  }
+
+  .james-copy{min-height:92svh}
+
+  .james-brand{
+    font-size:clamp(58px,18vw,92px);
+    letter-spacing:.025em;
+  }
+}
+
+@media(max-width:420px){
+  .james-section{background-position:58% center}
+  .james-brand{font-size:clamp(52px,17vw,76px)}
+}
