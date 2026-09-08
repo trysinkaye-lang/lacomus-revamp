@@ -1,366 +1,309 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { allProducts, duo, peso, products, type ProductId } from './data';
-
-type BagItem = { id: ProductId; quantity: number };
+import { FormEvent, useEffect, useRef, useState } from 'react';
+import { peso, products } from './data';
 
 const HERO_VIDEO = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/e853be58-e250-47be-bd1f-28eeecb49c87.mp4';
-const HERO_POSTER = products[0].image;
+const HERO_POSTER = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/3a2421a2-54a6-4574-9e9d-d883afdd3644.png';
+const JAMES_IMAGE = 'https://lacomusph.com/cdn/shop/files/lacomus-lifestyle-photography-10.jpg?v=1777665204&width=2200';
 
-const heroSteps = [
+const gallery = [
   {
-    start: 0.0,
-    end: 0.28,
-    eyebrow: 'LACOMUS / SCROLL FILM',
-    title: 'A DROP OF PRESENCE.',
-    copy: 'Scroll slowly. The film moves with you.',
+    src: 'https://lacomusph.com/cdn/shop/files/HRS07386.jpg?v=1783715351&width=2200',
+    alt: 'LACOMUS editorial fragrance portrait',
   },
   {
-    start: 0.2,
-    end: 0.53,
-    eyebrow: 'FORM / LIQUID / LIGHT',
-    title: 'FRAGRANCE TAKES FORM.',
-    copy: 'A single drop becomes liquid glass, then resolves into a signature.',
+    src: 'https://lacomusph.com/cdn/shop/files/HRS04564.jpg?v=1783715218&width=2200',
+    alt: 'LACOMUS studio fragrance portrait',
   },
   {
-    start: 0.48,
-    end: 0.8,
-    eyebrow: 'BLUE SAPPHIRE / POUR HOMME',
-    title: 'SILENT LUXURY.',
-    copy: 'Fresh, clean and controlled — presence without excess.',
+    src: 'https://lacomusph.com/cdn/shop/files/lacomus-perfume-model-shoot-08.jpg?v=1777665195&width=2200',
+    alt: 'LACOMUS outdoor fragrance lifestyle portrait',
   },
   {
-    start: 0.74,
-    end: 1.0,
-    eyebrow: 'LACOMUS / BLUE SAPPHIRE',
-    title: 'LEAVE A TRACE.',
-    copy: 'The bottle is the ending of the film — and the beginning of the experience.',
+    src: 'https://lacomusph.com/cdn/shop/files/HRS04133_feb928e7-f7cf-4f93-8680-8f94a35d8691.jpg?v=1785033348&width=2200',
+    alt: 'LACOMUS luxury lifestyle portrait',
   },
 ];
 
+type ChatMessage = {
+  from: 'bot' | 'user';
+  text: string;
+};
+
+const starterMessage: ChatMessage = {
+  from: 'bot',
+  text: 'Welcome to LACOMUS. I can help you explore Blue Sapphire, Pink Sapphire, Emerald, prices, delivery, or the official store.',
+};
+
+function conciergeAnswer(raw: string) {
+  const input = raw.toLowerCase();
+  const blue = products.find((product) => product.id === 'blue')!;
+  const pink = products.find((product) => product.id === 'pink')!;
+  const emerald = products.find((product) => product.id === 'emerald')!;
+
+  if (input.includes('blue') || input.includes('homme')) {
+    return `Blue Sapphire is ${blue.mood.toLowerCase()}. It is currently listed at ${peso(blue.price)} on the LACOMUS store.`;
+  }
+  if (input.includes('pink') || input.includes('femme')) {
+    return `Pink Sapphire is ${pink.mood.toLowerCase()}. It is currently listed at ${peso(pink.price)}. LACOMUS has not yet published its complete official scent-note breakdown.`;
+  }
+  if (input.includes('emerald') || input.includes('green')) {
+    return `Emerald is ${emerald.mood.toLowerCase()} with spice, cacao, mint, oud, amber and woods. The current listed price is ${peso(emerald.price)}.`;
+  }
+  if (input.includes('price') || input.includes('cost') || input.includes('how much')) {
+    return `Blue Sapphire: ${peso(blue.price)}. Pink Sapphire: ${peso(pink.price)}. Emerald: ${peso(emerald.price)} at the current listed promotional price.`;
+  }
+  if (input.includes('deliver') || input.includes('shipping') || input.includes('ship')) {
+    return 'The official LACOMUS storefront currently advertises 2–4 days delivery nationwide. Final courier timing can still vary by location and order conditions.';
+  }
+  if (input.includes('buy') || input.includes('shop') || input.includes('order') || input.includes('checkout')) {
+    return 'You can complete your purchase through the official LACOMUS store. Use the Shop button below to continue securely.';
+  }
+  if (input.includes('recommend') || input.includes('choose') || input.includes('which')) {
+    return 'For fresh and clean, start with Blue Sapphire. For soft and feminine, start with Pink Sapphire. For darker spice, woods and oud, explore Emerald.';
+  }
+
+  return 'I can help with Blue Sapphire, Pink Sapphire, Emerald, prices, delivery, choosing a scent, or getting to the official LACOMUS shop.';
+}
+
 export default function Home() {
-  const [bag, setBag] = useState<BagItem[]>([]);
-  const [bagOpen, setBagOpen] = useState(false);
-  const heroRef = useRef<HTMLElement | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const filmRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [messages, setMessages] = useState<ChatMessage[]>([starterMessage]);
 
   useEffect(() => {
-    const saved = localStorage.getItem('lacomus-bag');
-    if (!saved) return;
-    try {
-      setBag(JSON.parse(saved));
-    } catch {
-      localStorage.removeItem('lacomus-bag');
-    }
-  }, []);
+    const film = filmRef.current;
+    const video = videoRef.current;
+    if (!film || !video) return;
 
-  useEffect(() => {
-    localStorage.setItem('lacomus-bag', JSON.stringify(bag));
-  }, [bag]);
-
-  useEffect(() => {
-    document.body.style.overflow = bagOpen ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [bagOpen]);
-
-  useEffect(() => {
     let raf = 0;
+    let lastSeek = -1;
+    let lastSeekAt = 0;
+    let lastPhase = -1;
+    const coarsePointer = window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 760;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     const clamp = (value: number) => Math.min(1, Math.max(0, value));
-    const fadeWindow = (progress: number, start: number, end: number) => {
-      const edge = Math.min(0.085, Math.max(0.04, (end - start) * 0.28));
-      const fadeIn = clamp((progress - start) / edge);
-      const fadeOut = clamp((end - progress) / edge);
-      return Math.min(fadeIn, fadeOut);
+
+    const unlockVideo = () => {
+      if (reduceMotion) return;
+      const play = video.play();
+      if (play) play.then(() => video.pause()).catch(() => undefined);
     };
 
     const paint = () => {
-      const pageMax = document.documentElement.scrollHeight - innerHeight;
-      document.documentElement.style.setProperty('--progress', String(pageMax > 0 ? scrollY / pageMax : 0));
+      raf = 0;
 
-      const hero = heroRef.current;
-      if (hero) {
-        const rect = hero.getBoundingClientRect();
-        const scrollable = Math.max(1, hero.offsetHeight - innerHeight);
-        const progress = clamp(-rect.top / scrollable);
-        hero.style.setProperty('--hero', String(progress));
+      const pageMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      document.documentElement.style.setProperty('--progress', String(window.scrollY / pageMax));
 
-        const video = videoRef.current;
-        if (video && Number.isFinite(video.duration) && video.duration > 0) {
-          const target = Math.min(video.duration - 0.035, Math.max(0.01, progress * video.duration));
-          if (Math.abs(video.currentTime - target) > 0.025) {
-            try {
-              video.currentTime = target;
-            } catch {
-              // Some browsers reject seeks until metadata has settled; the next frame retries.
-            }
-          }
-        }
+      const rect = film.getBoundingClientRect();
+      const scrollable = Math.max(1, rect.height - window.innerHeight);
+      const progress = clamp(-rect.top / scrollable);
+      film.style.setProperty('--hero', String(progress));
 
-        hero.querySelectorAll<HTMLElement>('[data-hero-step]').forEach((node) => {
-          const start = Number(node.dataset.start ?? 0);
-          const end = Number(node.dataset.end ?? 1);
-          const opacity = fadeWindow(progress, start, end);
-          const midpoint = (start + end) / 2;
-          const y = (progress - midpoint) * -54;
-          node.style.opacity = String(opacity);
-          node.style.transform = `translate3d(0, ${y}px, 0)`;
-          node.style.pointerEvents = opacity > 0.55 ? 'auto' : 'none';
-        });
+      const phase = progress < 0.36 ? 0 : progress < 0.72 ? 1 : 2;
+      if (phase !== lastPhase) {
+        film.dataset.phase = String(phase);
+        lastPhase = phase;
       }
 
-      document.querySelectorAll<HTMLElement>('[data-story-scene]').forEach((scene) => {
-        const rect = scene.getBoundingClientRect();
-        const p = clamp((innerHeight - rect.top) / (rect.height + innerHeight));
-        scene.style.setProperty('--p', String(p));
-      });
+      if (!reduceMotion && video.readyState >= 1 && Number.isFinite(video.duration) && video.duration > 0) {
+        const target = Math.min(video.duration - 0.04, progress * video.duration);
+        const now = performance.now();
+        const minimumGap = coarsePointer ? 46 : 24;
+        const minimumDelta = coarsePointer ? 0.055 : 0.025;
+
+        if (Math.abs(target - lastSeek) >= minimumDelta && now - lastSeekAt >= minimumGap) {
+          try {
+            video.currentTime = target;
+            lastSeek = target;
+            lastSeekAt = now;
+          } catch {
+            // The poster remains visible until the browser allows media seeking.
+          }
+        }
+      }
     };
 
-    const schedule = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(paint);
+    const queuePaint = () => {
+      if (!raf) raf = requestAnimationFrame(paint);
     };
 
-    const video = videoRef.current;
-    video?.addEventListener('loadedmetadata', schedule);
-    video?.addEventListener('canplay', schedule);
-    paint();
-    addEventListener('scroll', schedule, { passive: true });
-    addEventListener('resize', schedule);
+    const onMetadata = () => {
+      video.pause();
+      try { video.currentTime = 0.001; } catch { /* browser will retry on scroll */ }
+      queuePaint();
+    };
+
+    video.addEventListener('loadedmetadata', onMetadata);
+    window.addEventListener('scroll', queuePaint, { passive: true });
+    window.addEventListener('resize', queuePaint, { passive: true });
+    window.addEventListener('touchstart', unlockVideo, { once: true, passive: true });
+    window.addEventListener('pointerdown', unlockVideo, { once: true, passive: true });
+    queuePaint();
 
     return () => {
-      video?.removeEventListener('loadedmetadata', schedule);
-      video?.removeEventListener('canplay', schedule);
-      removeEventListener('scroll', schedule);
-      removeEventListener('resize', schedule);
-      cancelAnimationFrame(raf);
+      video.removeEventListener('loadedmetadata', onMetadata);
+      window.removeEventListener('scroll', queuePaint);
+      window.removeEventListener('resize', queuePaint);
+      window.removeEventListener('touchstart', unlockVideo);
+      window.removeEventListener('pointerdown', unlockVideo);
+      if (raf) cancelAnimationFrame(raf);
     };
   }, []);
 
-  const bagCount = useMemo(() => bag.reduce((sum, item) => sum + item.quantity, 0), [bag]);
-  const bagTotal = useMemo(() => bag.reduce((sum, item) => {
-    const product = allProducts.find((entry) => entry.id === item.id);
-    return sum + (product?.price ?? 0) * item.quantity;
-  }, 0), [bag]);
+  function sendMessage(text: string) {
+    const cleaned = text.trim();
+    if (!cleaned) return;
+    setMessages((current) => [
+      ...current,
+      { from: 'user', text: cleaned },
+      { from: 'bot', text: conciergeAnswer(cleaned) },
+    ]);
+    setChatInput('');
+  }
 
-  const addToBag = (id: ProductId) => {
-    setBag((current) => current.some((item) => item.id === id)
-      ? current.map((item) => item.id === id ? { ...item, quantity: item.quantity + 1 } : item)
-      : [...current, { id, quantity: 1 }]);
-    setBagOpen(true);
-  };
-
-  const changeQuantity = (id: ProductId, delta: number) => {
-    setBag((current) => current
-      .map((item) => item.id === id ? { ...item, quantity: item.quantity + delta } : item)
-      .filter((item) => item.quantity > 0));
-  };
+  function submitChat(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    sendMessage(chatInput);
+  }
 
   return (
     <main>
       <div className="page-progress" aria-hidden="true" />
 
       <header className="topbar shell">
-        <a className="wordmark" href="#top" aria-label="LACOMUS home">LACOMUS</a>
+        <a className="wordmark" href="#film">LACOMUS</a>
         <nav aria-label="Primary navigation">
-          <a href="#story">Story</a>
-          <a href="#collection">Collection</a>
-          <a href="#duo">Duo</a>
+          <a href="#james">James Torres</a>
+          <a href="#gallery">Gallery</a>
+          <button type="button" onClick={() => setChatOpen(true)}>Concierge</button>
         </nav>
-        <button className="bag-button" type="button" onClick={() => setBagOpen(true)}>
-          Bag <span>{String(bagCount).padStart(2, '0')}</span>
-        </button>
+        <a className="shop-link" href="https://lacomusph.com/collections/all" target="_blank" rel="noreferrer">Shop ↗</a>
       </header>
 
-      <section id="top" className="scroll-film" ref={heroRef}>
-        <div className="scroll-film-stage">
+      <section id="film" ref={filmRef} className="scroll-film" data-phase="0">
+        <div className="film-stage">
           <video
             ref={videoRef}
             className="hero-video"
             src={HERO_VIDEO}
             poster={HERO_POSTER}
+            preload="auto"
             muted
             playsInline
-            preload="auto"
-            aria-label="LACOMUS Blue Sapphire perfume transformation film"
+            aria-label="LACOMUS Blue Sapphire cinematic perfume transformation"
           />
-          <div className="hero-vignette" aria-hidden="true" />
-          <div className="hero-light" aria-hidden="true" />
-          <div className="film-grain" aria-hidden="true" />
+          <div className="film-shade" aria-hidden="true" />
 
-          <div className="hero-copy shell">
-            {heroSteps.map((step, index) => (
-              <div
-                className={`hero-step hero-step-${index + 1}`}
-                data-hero-step
-                data-start={step.start}
-                data-end={step.end}
-                key={step.title}
-              >
-                <p className="eyebrow">{step.eyebrow}</p>
-                <h1>{step.title}</h1>
-                <p>{step.copy}</p>
-                {index === 3 && (
-                  <div className="hero-actions">
-                    <a className="button button-light" href="#collection">Discover the collection</a>
-                    <a className="text-link" href={products[0].url} target="_blank" rel="noreferrer">Shop Blue Sapphire ↗</a>
-                  </div>
-                )}
-              </div>
-            ))}
+          <div className="film-copy shell" aria-live="off">
+            <div className="film-copy-step film-copy-step-0">
+              <span>FORM / LIQUID / LIGHT</span>
+              <h1>Fragrance takes form.</h1>
+              <p>A single drop becomes liquid glass.</p>
+            </div>
+            <div className="film-copy-step film-copy-step-1">
+              <span>BLUE SAPPHIRE / POUR HOMME</span>
+              <h1>Quiet presence.</h1>
+              <p>The film stays in control. The product stays visible.</p>
+            </div>
+            <div className="film-copy-step film-copy-step-2">
+              <span>LACOMUS / SILENT LUXURY</span>
+              <h1>Leave a trace.</h1>
+              <p>Scroll once more to enter the brand story.</p>
+            </div>
           </div>
 
-          <div className="film-progress shell" aria-hidden="true">
-            <span>SCROLL TO CONTROL THE FILM</span>
-            <div><i /></div>
-            <span>00:08</span>
+          <div className="scroll-cue" aria-hidden="true">
+            <span>SCROLL</span>
+            <i>↓</i>
           </div>
         </div>
       </section>
 
-      <section id="story" className="manifesto shell">
-        <p className="eyebrow">THE LACOMUS LANGUAGE</p>
-        <div className="manifesto-grid">
-          <h2>Luxury should be felt, not announced.</h2>
+      <section id="james" className="james-section">
+        <img src={JAMES_IMAGE} alt="LACOMUS luxury fragrance lifestyle campaign" loading="eager" />
+        <div className="james-shade" aria-hidden="true" />
+        <div className="james-copy shell">
+          <p>PORTRAIT / LACOMUS</p>
+          <h2>James<br />Torres</h2>
+          <div className="james-brand">LACOMUS</div>
+          <span>Affordable silent luxury. Presence without excess.</span>
+          <a href="https://lacomusph.com/collections/all" target="_blank" rel="noreferrer">Explore LACOMUS ↗</a>
+        </div>
+      </section>
+
+      <section id="gallery" className="gallery-section">
+        <div className="gallery-heading shell">
           <div>
-            <p>LACOMUS becomes a story before it becomes a storefront. Motion, light and fragrance move first; product information follows only when it matters.</p>
-            <p className="microcopy">CINEMATIC COMMERCE / SCROLL-DRIVEN / QUIET CONFIDENCE</p>
+            <p>EDITORIAL / 2026</p>
+            <h2>The Gallery</h2>
           </div>
+          <span>Swipe on mobile →</span>
+        </div>
+
+        <div className="gallery-rail" aria-label="LACOMUS editorial gallery">
+          {gallery.map((image, index) => (
+            <figure key={image.src} className={`gallery-card gallery-card-${index + 1}`}>
+              <img src={image.src} alt={image.alt} loading="lazy" />
+              <figcaption>{String(index + 1).padStart(2, '0')} / LACOMUS</figcaption>
+            </figure>
+          ))}
         </div>
       </section>
 
-      <section id="collection" className="collection-intro shell">
-        <p className="eyebrow">THE COLLECTION</p>
-        <h2>Three signatures. Three different kinds of presence.</h2>
-      </section>
-
-      <div className="story-list">
-        {products.map((product, index) => (
-          <article
-            className={`product-story ${index % 2 ? 'product-story-reverse' : ''}`}
-            data-story-scene
-            key={product.id}
-          >
-            <div className="product-story-media">
-              <img src={product.image} alt={`${product.name} fragrance`} />
-              <span className="scene-index">{product.index}</span>
-            </div>
-            <div className="product-story-copy">
-              <p className="eyebrow">{product.subtitle}</p>
-              <h2>{product.name.replace('Lacomus ', '')}</h2>
-              <p className="mood">{product.mood}</p>
-              <p className="description">{product.description}</p>
-              <div className="note-stack">
-                <div><span>OPEN</span><p>{product.notes[0]}</p></div>
-                <div><span>HEART</span><p>{product.notes[1]}</p></div>
-                <div><span>TRAIL</span><p>{product.notes[2]}</p></div>
-              </div>
-              <div className="buy-row">
-                <div>
-                  <strong>{peso(product.price)}</strong>
-                  {product.compareAt && <del>{peso(product.compareAt)}</del>}
-                </div>
-                <button className="button button-outline" type="button" onClick={() => addToBag(product.id)}>Add to bag</button>
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
-
-      <section className="transition-quote">
-        <p>THREE EXPRESSIONS.</p>
-        <h2>One unmistakable presence.</h2>
-      </section>
-
-      <section id="duo" className="duo-story shell" data-story-scene>
-        <div className="duo-copy">
-          <p className="eyebrow">THE SIGNATURE DUO</p>
-          <h2>Two signatures.<br />One language.</h2>
-          <p>{duo.description}</p>
-          <div className="duo-price">
-            <strong>{peso(duo.price)}</strong>
-            {duo.compareAt && <del>{peso(duo.compareAt)}</del>}
-          </div>
-          <button className="button button-light" type="button" onClick={() => addToBag('duo')}>Add duo to bag</button>
-        </div>
-        <figure>
-          <img src={duo.image} alt="LACOMUS Blue Sapphire and Pink Sapphire bundle" />
-          <figcaption>BLUE SAPPHIRE + PINK SAPPHIRE</figcaption>
-        </figure>
-      </section>
-
-      <section className="review-strip shell">
-        <div>
-          <p className="eyebrow">VERIFIED EXPERIENCE</p>
-          <strong>4.84</strong>
-          <span>★★★★★</span>
-          <small>355 verified customer reviews on the current storefront.</small>
-        </div>
-        <blockquote>Confidence without excess.</blockquote>
-      </section>
-
-      <section className="finale">
-        <div>
-          <p className="eyebrow">LACOMUS / SILENT LUXURY</p>
-          <h2>LEAVE<br />A TRACE.</h2>
-          <p>Choose the fragrance that feels most like you, then continue to the official LACOMUS storefront for secure checkout.</p>
-          <a className="button button-light" href="https://lacomusph.com/collections/all" target="_blank" rel="noreferrer">Shop the official store ↗</a>
-        </div>
-      </section>
-
-      <footer className="footer shell">
-        <a className="wordmark" href="#top">LACOMUS</a>
-        <p>Concept revamp / scroll-controlled fragrance film / 2026</p>
-        <div>
-          <a href="https://lacomusph.com/policies/privacy-policy" target="_blank" rel="noreferrer">Privacy</a>
-          <a href="https://lacomusph.com/policies/refund-policy" target="_blank" rel="noreferrer">Returns</a>
-          <a href="https://lacomusph.com/pages/contact" target="_blank" rel="noreferrer">Contact</a>
-        </div>
+      <footer className="site-footer shell">
+        <a className="wordmark" href="#film">LACOMUS</a>
+        <p>More chapters will be added next.</p>
+        <a href="https://lacomusph.com/" target="_blank" rel="noreferrer">Official store ↗</a>
       </footer>
 
       <button
-        className={`bag-scrim ${bagOpen ? 'show' : ''}`}
-        aria-label="Close shopping bag"
-        onClick={() => setBagOpen(false)}
-      />
-      <aside className={`bag-drawer ${bagOpen ? 'open' : ''}`} aria-hidden={!bagOpen}>
+        className={`chat-launcher ${chatOpen ? 'chat-launcher-hidden' : ''}`}
+        type="button"
+        onClick={() => setChatOpen(true)}
+        aria-label="Open LACOMUS concierge"
+      >
+        <span>Chat with us</span>
+        <i aria-hidden="true" />
+      </button>
+
+      <aside className={`chat-panel ${chatOpen ? 'chat-panel-open' : ''}`} aria-hidden={!chatOpen}>
         <header>
-          <div><span>YOUR BAG</span><h2>{bagCount ? `${bagCount} ${bagCount === 1 ? 'item' : 'items'}` : 'Empty'}</h2></div>
-          <button type="button" aria-label="Close bag" onClick={() => setBagOpen(false)}>×</button>
+          <div>
+            <span>LACOMUS</span>
+            <strong>Concierge</strong>
+          </div>
+          <button type="button" onClick={() => setChatOpen(false)} aria-label="Close concierge">×</button>
         </header>
-        <div className="bag-items">
-          {bag.length === 0 ? (
-            <div className="bag-empty">
-              <p className="eyebrow">START WITH A SIGNATURE</p>
-              <h3>Your bag is waiting.</h3>
-              <a className="button button-dark" href="#collection" onClick={() => setBagOpen(false)}>Explore collection</a>
-            </div>
-          ) : bag.map((item) => {
-            const product = allProducts.find((entry) => entry.id === item.id)!;
-            return (
-              <article key={item.id}>
-                <img src={product.image} alt="" />
-                <div>
-                  <span>{product.subtitle}</span>
-                  <h3>{product.name.replace('Lacomus ', '')}</h3>
-                  <strong>{peso(product.price)}</strong>
-                  <div className="quantity">
-                    <button type="button" aria-label={`Remove one ${product.name}`} onClick={() => changeQuantity(item.id, -1)}>−</button>
-                    <b>{item.quantity}</b>
-                    <button type="button" aria-label={`Add one ${product.name}`} onClick={() => changeQuantity(item.id, 1)}>+</button>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
+
+        <div className="chat-messages" aria-live="polite">
+          {messages.map((message, index) => (
+            <p key={`${message.from}-${index}`} className={`chat-message chat-message-${message.from}`}>{message.text}</p>
+          ))}
         </div>
-        <footer>
-          <div><span>Concept bag total</span><strong>{peso(bagTotal)}</strong></div>
-          <p>Secure payment, inventory and fulfilment continue on the official LACOMUS store.</p>
-          <a href="https://lacomusph.com/collections/all" target="_blank" rel="noreferrer">Continue to official store ↗</a>
-        </footer>
+
+        <div className="chat-quick-actions">
+          <button type="button" onClick={() => sendMessage('Which scent should I choose?')}>Choose a scent</button>
+          <button type="button" onClick={() => sendMessage('What are the prices?')}>Prices</button>
+          <button type="button" onClick={() => sendMessage('How long is delivery?')}>Delivery</button>
+        </div>
+
+        <form onSubmit={submitChat}>
+          <input
+            value={chatInput}
+            onChange={(event) => setChatInput(event.target.value)}
+            placeholder="Ask about LACOMUS..."
+            aria-label="Message LACOMUS concierge"
+          />
+          <button type="submit" aria-label="Send message">↑</button>
+        </form>
+
+        <a className="chat-shop" href="https://lacomusph.com/collections/all" target="_blank" rel="noreferrer">Shop official LACOMUS ↗</a>
       </aside>
     </main>
   );
