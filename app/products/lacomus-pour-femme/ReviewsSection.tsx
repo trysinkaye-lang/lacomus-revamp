@@ -1,5 +1,6 @@
 import ReviewsExplorer, { type ReviewItem, type ReviewPicture } from './ReviewsExplorer';
 import styles from './reviews.module.css';
+import enhanced from './reviews-enhanced.module.css';
 
 const OFFICIAL_PRODUCT = 'https://lacomusph.com/products/lacomus-pour-femme';
 const PRODUCT_ID = 8873526460552;
@@ -75,8 +76,8 @@ export default async function ReviewsSection() {
       </div>
 
       {media.length > 0 && (
-        <div className={styles.mediaBlock}>
-          <div className={styles.mediaHeading}>
+        <div className={enhanced.mediaBlock}>
+          <div className={enhanced.mediaHeading}>
             <div>
               <span>COMMUNITY GALLERY</span>
               <h3>Seen in the wild.</h3>
