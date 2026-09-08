@@ -3,6 +3,7 @@ import './globals.css';
 import './visual-fixes.css';
 import './product-sections.css';
 import './james-clean.css';
+import './react-bits.css';
 
 export const metadata: Metadata = {
   title: 'LACOMUS — Silent Luxury',
