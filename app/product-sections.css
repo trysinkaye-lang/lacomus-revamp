@@ -3,9 +3,11 @@
 .signature-panel>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;transform:scale(1.01)}
 .signature-panel-blue>img{object-position:68% center}
 .signature-panel-pink>img{object-position:35% center}
-.signature-panel-emerald>img{object-position:63% center}
+/* Emerald source is composed left-of-center. Pull the crop toward the image's left edge so the hero bottle lands on the right side without mirroring the label. */
+.signature-panel-emerald>img{object-position:8% center;transform:scale(1.025)}
 .signature-panel-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(2,5,9,.82) 0,rgba(2,5,9,.55) 28%,rgba(2,5,9,.14) 52%,rgba(2,5,9,.02) 72%,rgba(2,5,9,.1) 100%),linear-gradient(0deg,rgba(2,5,9,.38),transparent 45%)}
 .signature-panel-pink .signature-panel-shade{background:linear-gradient(270deg,rgba(22,12,12,.74) 0,rgba(22,12,12,.48) 31%,rgba(22,12,12,.08) 57%,transparent 78%),linear-gradient(0deg,rgba(18,9,9,.34),transparent 44%)}
+.signature-panel-emerald .signature-panel-shade{background:linear-gradient(90deg,rgba(2,7,5,.88) 0,rgba(2,7,5,.7) 24%,rgba(2,7,5,.3) 42%,rgba(2,7,5,.06) 61%,transparent 78%),linear-gradient(0deg,rgba(2,6,4,.36),transparent 46%)}
 .signature-panel-copy{position:relative;z-index:2;min-height:100svh;display:flex;align-items:center}
 .signature-panel-copy>div{width:min(500px,39vw);padding:38px 0;text-shadow:0 2px 24px rgba(0,0,0,.5)}
 .signature-panel-pink .signature-panel-copy{justify-content:flex-end}
@@ -28,7 +30,9 @@
 @media(max-width:900px){
   .signature-panel{min-height:0;padding-top:62svh;overflow:visible}
   .signature-panel>img{height:62svh;bottom:auto;object-position:center!important;transform:none}
-  .signature-panel-shade,.signature-panel-pink .signature-panel-shade{height:62svh;bottom:auto;background:linear-gradient(0deg,#05080c 0,rgba(5,8,12,.18) 28%,rgba(5,8,12,.02) 66%,rgba(5,8,12,.12) 100%)}
+  /* Keep Emerald slightly right-weighted on touch layouts while preserving the full label. */
+  .signature-panel-emerald>img{object-position:42% center!important}
+  .signature-panel-shade,.signature-panel-pink .signature-panel-shade,.signature-panel-emerald .signature-panel-shade{height:62svh;bottom:auto;background:linear-gradient(0deg,#05080c 0,rgba(5,8,12,.18) 28%,rgba(5,8,12,.02) 66%,rgba(5,8,12,.12) 100%)}
   .signature-panel-copy,.signature-panel-pink .signature-panel-copy{min-height:0;display:block;padding-top:30px;padding-bottom:84px}
   .signature-panel-copy>div,.signature-panel-pink .signature-panel-copy>div{width:100%;max-width:620px;padding:0;text-align:left;text-shadow:none}
   .signature-panel h2{font-size:clamp(52px,14vw,82px);line-height:.88}
@@ -39,7 +43,7 @@
 
 @media(max-width:560px){
   .signature-panel{padding-top:56svh}
-  .signature-panel>img,.signature-panel-shade,.signature-panel-pink .signature-panel-shade{height:56svh}
+  .signature-panel>img,.signature-panel-shade,.signature-panel-pink .signature-panel-shade,.signature-panel-emerald .signature-panel-shade{height:56svh}
   .signature-panel-copy,.signature-panel-pink .signature-panel-copy{padding-top:24px;padding-bottom:68px}
   .signature-panel h2{font-size:clamp(48px,15vw,68px)}
   .signature-description{font-size:13px;line-height:1.65}
