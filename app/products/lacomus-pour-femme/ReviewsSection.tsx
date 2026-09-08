@@ -69,9 +69,9 @@ export default async function ReviewsSection() {
         </div>
 
         <div className={styles.context}>
-          <p>Real feedback from women wearing Pink Sapphire.</p>
-          <span>The design now follows familiar beauty-commerce review patterns: verified-purchase trust signals, customer media, filters, sorting, and readable review cards.</span>
-          <a href={OFFICIAL_PRODUCT} target="_blank" rel="noreferrer">View all {REVIEW_COUNT} on LACOMUS ↗</a>
+          <p>The fragrance leaves the room. The impression stays.</p>
+          <span>Verified customer notes and photographs from women living with Pink Sapphire beyond the campaign image.</span>
+          <a href={OFFICIAL_PRODUCT} target="_blank" rel="noreferrer">View all {REVIEW_COUNT} reviews ↗</a>
         </div>
       </div>
 
@@ -79,17 +79,17 @@ export default async function ReviewsSection() {
         <div className={enhanced.mediaBlock}>
           <div className={enhanced.mediaHeading}>
             <div>
-              <span>COMMUNITY GALLERY</span>
+              <span>CUSTOMER PORTRAITS</span>
               <h3>Seen in the wild.</h3>
             </div>
-            <p>Customer-uploaded photos from the live LACOMUS review feed.</p>
+            <p>Real customer photographs from the live LACOMUS review archive.</p>
           </div>
 
           <div className={styles.mediaRail} aria-label="Customer review photos">
             {media.map((item, index) => (
               <figure key={`${item.src}-${index}`} className={styles.mediaCard}>
                 <img src={item.src} alt={`Customer review photo from ${item.reviewer}`} loading="lazy" />
-                <figcaption>Customer photo · {String(index + 1).padStart(2, '0')}</figcaption>
+                <figcaption>Customer portrait · {String(index + 1).padStart(2, '0')}</figcaption>
               </figure>
             ))}
           </div>
@@ -100,7 +100,7 @@ export default async function ReviewsSection() {
         <ReviewsExplorer reviews={reviews} totalCount={REVIEW_COUNT} officialProduct={OFFICIAL_PRODUCT} />
       ) : (
         <div className={styles.fallback}>
-          <p>The live review feed is temporarily unavailable.</p>
+          <p>The live review archive is temporarily unavailable.</p>
           <a href={OFFICIAL_PRODUCT} target="_blank" rel="noreferrer">Read the verified reviews on LACOMUS ↗</a>
         </div>
       )}
