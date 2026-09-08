@@ -185,8 +185,8 @@ export default function Home() {
       <header className="topbar shell">
         <a className="wordmark" href="#film">LACOMUS</a>
         <nav aria-label="Primary navigation">
-          <a href="#collection">Collection</a>
           <a href="#james">James Torres</a>
+          <a href="#collection">Collection</a>
           <a href="#gallery">Gallery</a>
           <button type="button" onClick={() => setChatOpen(true)}>Concierge</button>
         </nav>
@@ -221,7 +221,7 @@ export default function Home() {
             <div className="film-copy-step film-copy-step-2">
               <span>LACOMUS / SILENT LUXURY</span>
               <h1>Leave a trace.</h1>
-              <p>Scroll once more to enter the collection.</p>
+              <p>Scroll once more to meet James Torres.</p>
             </div>
           </div>
 
@@ -229,6 +229,18 @@ export default function Home() {
             <span>SCROLL</span>
             <i>↓</i>
           </div>
+        </div>
+      </section>
+
+      <section id="james" className="james-section">
+        <img src={JAMES_IMAGE} alt="LACOMUS luxury fragrance lifestyle campaign" loading="eager" />
+        <div className="james-shade" aria-hidden="true" />
+        <div className="james-copy shell">
+          <p>PORTRAIT / LACOMUS</p>
+          <h2>James<br />Torres</h2>
+          <div className="james-brand">LACOMUS</div>
+          <span>Affordable silent luxury. Presence without excess.</span>
+          <a href="https://lacomusph.com/collections/all" target="_blank" rel="noreferrer">Explore LACOMUS ↗</a>
         </div>
       </section>
 
@@ -259,18 +271,6 @@ export default function Home() {
             </div>
           </article>
         ))}
-      </section>
-
-      <section id="james" className="james-section">
-        <img src={JAMES_IMAGE} alt="LACOMUS luxury fragrance lifestyle campaign" loading="lazy" />
-        <div className="james-shade" aria-hidden="true" />
-        <div className="james-copy shell">
-          <p>PORTRAIT / LACOMUS</p>
-          <h2>James<br />Torres</h2>
-          <div className="james-brand">LACOMUS</div>
-          <span>Affordable silent luxury. Presence without excess.</span>
-          <a href="https://lacomusph.com/collections/all" target="_blank" rel="noreferrer">Explore LACOMUS ↗</a>
-        </div>
       </section>
 
       <section id="gallery" className="gallery-section">
