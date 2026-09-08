@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import styles from './reviews.module.css';
+import base from './reviews.module.css';
+import enhanced from './reviews-enhanced.module.css';
 
 export type ReviewPicture = {
   original?: string;
@@ -84,27 +85,27 @@ export default function ReviewsExplorer({ reviews, totalCount, officialProduct }
   };
 
   return (
-    <div className={styles.explorer}>
-      <div className={styles.reviewToolbar}>
-        <div className={styles.filterGroup} aria-label="Filter recent reviews">
-          <button className={filter === 'all' ? styles.activeFilter : ''} onClick={() => selectFilter('all')} type="button">
+    <div className={enhanced.explorer}>
+      <div className={enhanced.reviewToolbar}>
+        <div className={enhanced.filterGroup} aria-label="Filter recent reviews">
+          <button className={filter === 'all' ? enhanced.activeFilter : ''} onClick={() => selectFilter('all')} type="button">
             All <span>{counts.all}</span>
           </button>
-          <button className={filter === 'verified' ? styles.activeFilter : ''} onClick={() => selectFilter('verified')} type="button">
+          <button className={filter === 'verified' ? enhanced.activeFilter : ''} onClick={() => selectFilter('verified')} type="button">
             Verified <span>{counts.verified}</span>
           </button>
-          <button className={filter === 'media' ? styles.activeFilter : ''} onClick={() => selectFilter('media')} type="button">
+          <button className={filter === 'media' ? enhanced.activeFilter : ''} onClick={() => selectFilter('media')} type="button">
             With photos <span>{counts.media}</span>
           </button>
-          <button className={filter === '5' ? styles.activeFilter : ''} onClick={() => selectFilter('5')} type="button">
+          <button className={filter === '5' ? enhanced.activeFilter : ''} onClick={() => selectFilter('5')} type="button">
             5 stars <span>{counts.five}</span>
           </button>
-          <button className={filter === '4' ? styles.activeFilter : ''} onClick={() => selectFilter('4')} type="button">
+          <button className={filter === '4' ? enhanced.activeFilter : ''} onClick={() => selectFilter('4')} type="button">
             4 stars <span>{counts.four}</span>
           </button>
         </div>
 
-        <label className={styles.sortControl}>
+        <label className={enhanced.sortControl}>
           <span>Sort</span>
           <select value={sort} onChange={(event) => setSort(event.target.value as Sort)}>
             <option value="newest">Most recent</option>
@@ -114,28 +115,28 @@ export default function ReviewsExplorer({ reviews, totalCount, officialProduct }
         </label>
       </div>
 
-      <div className={styles.feedMeta}>
+      <div className={enhanced.feedMeta}>
         <span>Showing {Math.min(visible.length, filtered.length)} of {filtered.length} recent matching reviews</span>
         <span>{totalCount} total reviews on the official LACOMUS product page</span>
       </div>
 
       {visible.length > 0 ? (
-        <div className={styles.reviewGrid}>
+        <div className={base.reviewGrid}>
           {visible.map((review, index) => {
             const picture = review.pictures_urls?.[0];
             const pictureSrc = picture?.huge || picture?.original || picture?.small || '';
 
             return (
-              <article className={styles.reviewCard} key={review.uuid}>
-                <div className={styles.cardTop}>
-                  <span className={styles.cardStars} aria-label={`${review.rating} out of 5 stars`}>
+              <article className={base.reviewCard} key={review.uuid}>
+                <div className={base.cardTop}>
+                  <span className={base.cardStars} aria-label={`${review.rating} out of 5 stars`}>
                     {stars(review.rating)}
                   </span>
-                  <span className={styles.index}>{String(index + 1).padStart(2, '0')}</span>
+                  <span className={base.index}>{String(index + 1).padStart(2, '0')}</span>
                 </div>
 
                 {pictureSrc && (
-                  <figure className={styles.inlineMedia}>
+                  <figure className={enhanced.inlineMedia}>
                     <img src={pictureSrc} alt={`Review photo from ${review.reviewer_name || 'a LACOMUS customer'}`} loading="lazy" />
                     <figcaption>Customer photo</figcaption>
                   </figure>
@@ -144,12 +145,12 @@ export default function ReviewsExplorer({ reviews, totalCount, officialProduct }
                 <blockquote>“{review.body || 'Customer rating submitted for LACOMUS Pour Femme.'}”</blockquote>
 
                 <footer>
-                  <div className={styles.avatar} aria-hidden="true">
+                  <div className={base.avatar} aria-hidden="true">
                     {(review.reviewer_initial || review.reviewer_name?.[0] || 'L').toUpperCase()}
                   </div>
-                  <div className={styles.reviewer}>
+                  <div className={base.reviewer}>
                     <strong>{review.reviewer_name || 'Anonymous'}</strong>
-                    <span className={review.verified_buyer ? styles.verified : styles.unverified}>
+                    <span className={review.verified_buyer ? enhanced.verified : enhanced.unverified}>
                       {review.verified_buyer ? '✓ Verified Buyer' : 'Customer Review'}
                     </span>
                   </div>
@@ -160,16 +161,16 @@ export default function ReviewsExplorer({ reviews, totalCount, officialProduct }
           })}
         </div>
       ) : (
-        <div className={styles.emptyState}>No recent reviews match this filter.</div>
+        <div className={enhanced.emptyState}>No recent reviews match this filter.</div>
       )}
 
-      <div className={styles.reviewActions}>
+      <div className={enhanced.reviewActions}>
         {visible.length < filtered.length && (
           <button type="button" onClick={() => setLimit((current) => current + 6)}>
             Show more reviews
           </button>
         )}
-        <a href={officialProduct} target="_blank" rel="noreferrer">View all {totalCount} verified reviews on LACOMUS ↗</a>
+        <a href={officialProduct} target="_blank" rel="noreferrer">View all {totalCount} reviews on LACOMUS ↗</a>
       </div>
     </div>
   );
