@@ -2,10 +2,13 @@
 
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { peso, products } from './data';
+import FadeContent from './components/react-bits/FadeContent';
+import GlareHover from './components/react-bits/GlareHover';
 
-const HERO_VIDEO = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/e853be58-e250-47be-bd1f-28eeecb49c87.mp4';
+const HERO_VIDEO_HQ = 'https://d8j0ntlcm91z4.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/hf_20260908_155625_1f61fd16-4ee0-4d31-9189-da7bc1af548c.mp4';
+const HERO_VIDEO_MOBILE = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/e853be58-e250-47be-bd1f-28eeecb49c87.mp4';
 const HERO_POSTER = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/3a2421a2-54a6-4574-9e9d-d883afdd3644.png';
-const JAMES_IMAGE = 'https://lacomusph.com/cdn/shop/files/lacomus-lifestyle-photography-10.jpg?v=1777665204&width=2200';
+const JAMES_IMAGE = 'https://lacomusph.com/cdn/shop/files/lacomus-website-hero-banner-01_633cd047-6b13-4ca6-9fd1-342d197e004b.png?v=1784811172&width=3840';
 
 const productCampaign: Record<string, string> = {
   blue: 'https://d8j0ntlcm91z4.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/hf_20260908_091944_bc61ad67-edb4-4e67-af1b-0535544a8d7f.png',
@@ -120,8 +123,8 @@ export default function Home() {
       if (!reduceMotion && video.readyState >= 1 && Number.isFinite(video.duration) && video.duration > 0) {
         const target = Math.min(video.duration - 0.04, progress * video.duration);
         const now = performance.now();
-        const minimumGap = coarsePointer ? 58 : 28;
-        const minimumDelta = coarsePointer ? 0.075 : 0.03;
+        const minimumGap = coarsePointer ? 54 : 40;
+        const minimumDelta = coarsePointer ? 0.07 : 0.04;
 
         if (Math.abs(target - lastSeek) >= minimumDelta && now - lastSeekAt >= minimumGap) {
           try {
@@ -198,13 +201,15 @@ export default function Home() {
           <video
             ref={videoRef}
             className="hero-video"
-            src={HERO_VIDEO}
             poster={HERO_POSTER}
             preload="auto"
             muted
             playsInline
             aria-label="LACOMUS Blue Sapphire cinematic perfume transformation"
-          />
+          >
+            <source media="(max-width: 760px)" src={HERO_VIDEO_MOBILE} type="video/mp4" />
+            <source src={HERO_VIDEO_HQ} type="video/mp4" />
+          </video>
           <div className="film-shade" aria-hidden="true" />
 
           <div className="film-copy shell" aria-live="off">
@@ -216,7 +221,7 @@ export default function Home() {
             <div className="film-copy-step film-copy-step-1">
               <span>BLUE SAPPHIRE / POUR HOMME</span>
               <h1>Quiet presence.</h1>
-              <p>The film stays in control. The product stays visible.</p>
+              <p>Liquid, light and glass resolve into the signature.</p>
             </div>
             <div className="film-copy-step film-copy-step-2">
               <span>LACOMUS / SILENT LUXURY</span>
@@ -233,14 +238,13 @@ export default function Home() {
       </section>
 
       <section id="james" className="james-section">
-        <img src={JAMES_IMAGE} alt="LACOMUS luxury fragrance lifestyle campaign" loading="eager" />
+        <img src={JAMES_IMAGE} alt="LACOMUS campaign featuring James Torres" loading="eager" fetchPriority="high" />
         <div className="james-shade" aria-hidden="true" />
+        <div className="james-aura" aria-hidden="true" />
         <div className="james-copy shell">
-          <p>PORTRAIT / LACOMUS</p>
-          <h2>James<br />Torres</h2>
-          <div className="james-brand">LACOMUS</div>
-          <span>Affordable silent luxury. Presence without excess.</span>
-          <a href="https://lacomusph.com/collections/all" target="_blank" rel="noreferrer">Explore LACOMUS ↗</a>
+          <FadeContent blur duration={1.05} threshold={0.22} className="james-word-reveal">
+            <div className="james-brand">LACOMUS</div>
+          </FadeContent>
         </div>
       </section>
 
@@ -254,38 +258,54 @@ export default function Home() {
             />
             <div className="signature-panel-shade" aria-hidden="true" />
             <div className="signature-panel-copy shell">
-              <div>
-                <p className="signature-kicker">{product.subtitle.replace(' · Eau de Parfum', '')}</p>
-                <h2>{product.name.replace('Lacomus ', '')}</h2>
-                <p className="signature-mood">{product.mood}</p>
-                <p className="signature-description">{product.description}</p>
-                <div className="signature-price">
-                  <strong>{peso(product.price)}</strong>
-                  {product.compareAt ? <del>{peso(product.compareAt)}</del> : null}
+              <FadeContent blur={false} duration={0.75} threshold={0.2}>
+                <div>
+                  <p className="signature-kicker">{product.subtitle.replace(' · Eau de Parfum', '')}</p>
+                  <h2>{product.name.replace('Lacomus ', '')}</h2>
+                  <p className="signature-mood">{product.mood}</p>
+                  <p className="signature-description">{product.description}</p>
+                  <div className="signature-price">
+                    <strong>{peso(product.price)}</strong>
+                    {product.compareAt ? <del>{peso(product.compareAt)}</del> : null}
+                  </div>
+                  <div className="signature-actions">
+                    <a className="signature-button" href={product.url} target="_blank" rel="noreferrer">Shop fragrance</a>
+                    <a className="signature-details" href={product.url} target="_blank" rel="noreferrer">Full details ↗</a>
+                  </div>
                 </div>
-                <div className="signature-actions">
-                  <a className="signature-button" href={product.url} target="_blank" rel="noreferrer">Shop fragrance</a>
-                  <a className="signature-details" href={product.url} target="_blank" rel="noreferrer">Full details ↗</a>
-                </div>
-              </div>
+              </FadeContent>
             </div>
           </article>
         ))}
       </section>
 
       <section id="gallery" className="gallery-section">
-        <div className="gallery-heading shell">
-          <div>
-            <p>EDITORIAL / 2026</p>
-            <h2>The Gallery</h2>
+        <FadeContent blur={false} duration={0.8} threshold={0.18} className="gallery-heading-reveal">
+          <div className="gallery-heading shell">
+            <div>
+              <p>EDITORIAL / 2026</p>
+              <h2>The Gallery</h2>
+            </div>
+            <span>Swipe on mobile →</span>
           </div>
-          <span>Swipe on mobile →</span>
-        </div>
+        </FadeContent>
 
         <div className="gallery-rail" aria-label="LACOMUS editorial gallery">
           {gallery.map((image, index) => (
             <figure key={image.src} className={`gallery-card gallery-card-${index + 1}`}>
-              <img src={image.src} alt={image.alt} loading="lazy" />
+              <GlareHover
+                className="gallery-glare"
+                width="100%"
+                height="100%"
+                background="transparent"
+                borderColor="transparent"
+                borderRadius="28px 28px 0 0"
+                glareOpacity={0.14}
+                glareSize={220}
+                transitionDuration={760}
+              >
+                <img src={image.src} alt={image.alt} loading="lazy" />
+              </GlareHover>
               <figcaption>{String(index + 1).padStart(2, '0')} / LACOMUS</figcaption>
             </figure>
           ))}
