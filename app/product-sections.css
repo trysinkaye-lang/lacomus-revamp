@@ -3,8 +3,8 @@
 .signature-panel>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;transform:scale(1.01)}
 .signature-panel-blue>img{object-position:68% center}
 .signature-panel-pink>img{object-position:35% center}
-/* Emerald needs a real compositional move, not just object-position. Widen the source and translate it right so the hero bottle clears the copy column while keeping the label readable. */
-.signature-panel-emerald>img{inset:auto;top:0;bottom:0;left:-8%;right:auto;width:118%;height:100%;object-position:center center;transform:translate3d(28vw,0,0) scale(1.025);transform-origin:center center}
+/* Emerald: keep the bottle clearly on the right and give the campaign plane a subtle inward three-quarter presentation, matching the approved direction without mirroring the label. */
+.signature-panel-emerald>img{inset:auto;top:-1%;bottom:-1%;left:-6%;right:auto;width:116%;height:102%;object-position:center center;transform:translate3d(27vw,0,0) perspective(1500px) rotateY(-4.5deg) scale(1.03);transform-origin:72% 50%;backface-visibility:hidden}
 .signature-panel-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(2,5,9,.82) 0,rgba(2,5,9,.55) 28%,rgba(2,5,9,.14) 52%,rgba(2,5,9,.02) 72%,rgba(2,5,9,.1) 100%),linear-gradient(0deg,rgba(2,5,9,.38),transparent 45%)}
 .signature-panel-pink .signature-panel-shade{background:linear-gradient(270deg,rgba(22,12,12,.74) 0,rgba(22,12,12,.48) 31%,rgba(22,12,12,.08) 57%,transparent 78%),linear-gradient(0deg,rgba(18,9,9,.34),transparent 44%)}
 .signature-panel-emerald .signature-panel-shade{background:linear-gradient(90deg,rgba(2,7,5,.96) 0,rgba(2,7,5,.86) 23%,rgba(2,7,5,.58) 35%,rgba(2,7,5,.17) 49%,rgba(2,7,5,.03) 66%,transparent 78%),linear-gradient(0deg,rgba(2,6,4,.38),transparent 46%)}
@@ -28,14 +28,14 @@
 .signature-details{font-size:8px;letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.5);padding-bottom:4px}
 
 @media(max-width:1200px) and (min-width:901px){
-  .signature-panel-emerald>img{left:-12%;width:124%;transform:translate3d(24vw,0,0) scale(1.02)}
+  .signature-panel-emerald>img{left:-10%;width:122%;transform:translate3d(23vw,0,0) perspective(1300px) rotateY(-4deg) scale(1.025);transform-origin:72% 50%}
 }
 
 @media(max-width:900px){
   .signature-panel{min-height:0;padding-top:62svh;overflow:visible}
   .signature-panel>img{height:62svh;bottom:auto;object-position:center!important;transform:none}
-  /* On touch layouts the image sits above the copy, so use a centered-but-right-weighted crop instead of the desktop translation. */
-  .signature-panel-emerald>img{inset:0;bottom:auto;left:0;right:0;width:100%;height:62svh;object-position:38% center!important;transform:none}
+  /* Mobile keeps the bottle in the right half without any perspective warp, which is lighter and more stable on touch devices. */
+  .signature-panel-emerald>img{inset:0;bottom:auto;left:0;right:0;width:100%;height:62svh;object-position:31% center!important;transform:translateX(8%) scale(1.04);transform-origin:center center}
   .signature-panel-shade,.signature-panel-pink .signature-panel-shade,.signature-panel-emerald .signature-panel-shade{height:62svh;bottom:auto;background:linear-gradient(0deg,#05080c 0,rgba(5,8,12,.18) 28%,rgba(5,8,12,.02) 66%,rgba(5,8,12,.12) 100%)}
   .signature-panel-copy,.signature-panel-pink .signature-panel-copy{min-height:0;display:block;padding-top:30px;padding-bottom:84px}
   .signature-panel-copy>div,.signature-panel-pink .signature-panel-copy>div{width:100%;max-width:620px;padding:0;text-align:left;text-shadow:none}
@@ -48,7 +48,7 @@
 @media(max-width:560px){
   .signature-panel{padding-top:56svh}
   .signature-panel>img,.signature-panel-shade,.signature-panel-pink .signature-panel-shade,.signature-panel-emerald .signature-panel-shade{height:56svh}
-  .signature-panel-emerald>img{height:56svh;object-position:36% center!important}
+  .signature-panel-emerald>img{height:56svh;object-position:29% center!important;transform:translateX(10%) scale(1.05)}
   .signature-panel-copy,.signature-panel-pink .signature-panel-copy{padding-top:24px;padding-bottom:68px}
   .signature-panel h2{font-size:clamp(48px,15vw,68px)}
   .signature-description{font-size:13px;line-height:1.65}
