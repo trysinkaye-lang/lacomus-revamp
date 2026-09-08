@@ -60,7 +60,7 @@ export default function FragranceCategories() {
 
         <a
           className="category-card category-card-femme"
-          href="#fragrance-pink"
+          href="/products/lacomus-pour-femme"
           onMouseEnter={() => setActive('femme')}
           onFocus={() => setActive('femme')}
           onBlur={() => setActive(null)}
