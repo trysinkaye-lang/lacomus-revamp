@@ -2,37 +2,8 @@
 
 import { useEffect } from 'react';
 
-const DESKTOP_SHEETS = [
-  'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/2897d7bc-3ca8-44a9-a52b-54d9f00a4619.webp',
-  'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/6943d680-bbae-47c4-8872-45e05d585ca0.webp',
-  'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/45f96f52-bd8b-4442-b5ce-876ccd65e796.webp',
-  'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/5af88e02-7373-464c-9716-4100a347cfa7.webp',
-  'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/01630d0e-67fb-42e7-aa7b-199701d3b8cd.webp',
-  'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/3d9591dd-8bb1-4e75-9aac-36685081190f.webp',
-  'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/4fc469ff-be4f-4b8b-ba30-ac2a3fe9b0f6.webp',
-];
-
-const MOBILE_SHEETS = [
-  'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/85ca0077-2958-409b-a851-467fa10ac909.webp',
-  'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/4ff6a2c0-63d0-4af1-a140-b5e6481d61b9.webp',
-  'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/ee038889-a741-43e7-8897-9bcb6d52c343.webp',
-  'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/d07f3102-2bd6-4d58-90a4-30d98e7a79b8.webp',
-];
-
-type FilmConfig = {
-  sheets: string[];
-  frameWidth: number;
-  frameHeight: number;
-  totalFrames: number;
-  focusX: number;
-  focusY: number;
-  maxCanvasWidth: number;
-  maxCanvasHeight: number;
-  dprCap: number;
-};
-
-const FRAMES_PER_SHEET = 16;
-const SHEET_COLUMNS = 4;
+const DESKTOP_VIDEO = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/7f8d7aff-eb99-48fb-a17e-3c1063609bbb.mp4';
+const MOBILE_VIDEO = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/fd73b963-87f4-4281-977c-3e52b7e37324.mp4';
 
 function clamp01(value: number) {
   return Math.max(0, Math.min(1, value));
@@ -42,155 +13,93 @@ export default function FrameFilmEngine() {
   useEffect(() => {
     const film = document.querySelector<HTMLElement>('#film');
     const stage = film?.querySelector<HTMLElement>('.film-stage');
-    const video = stage?.querySelector<HTMLVideoElement>('.hero-video');
-    if (!film || !stage || !video) return;
+    const legacyVideo = stage?.querySelector<HTMLVideoElement>('.hero-video');
+    if (!film || !stage || !legacyVideo) return;
 
     const isMobile = window.matchMedia('(max-width: 760px)').matches || window.matchMedia('(pointer: coarse)').matches;
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const source = isMobile ? MOBILE_VIDEO : DESKTOP_VIDEO;
 
-    const config: FilmConfig = isMobile
-      ? {
-          sheets: MOBILE_SHEETS,
-          frameWidth: 960,
-          frameHeight: 540,
-          totalFrames: 64,
-          focusX: 0.61,
-          focusY: 0.5,
-          maxCanvasWidth: 1280,
-          maxCanvasHeight: 1080,
-          dprCap: 1.25,
-        }
-      : {
-          sheets: DESKTOP_SHEETS,
-          frameWidth: 1280,
-          frameHeight: 720,
-          totalFrames: 97,
-          focusX: 0.5,
-          focusY: 0.5,
-          maxCanvasWidth: 1920,
-          maxCanvasHeight: 1080,
-          dprCap: 1.5,
-        };
-
-    const canvas = document.createElement('canvas');
-    canvas.className = 'hero-frame-canvas';
-    canvas.setAttribute('aria-hidden', 'true');
-    stage.insertBefore(canvas, video);
-
-    const context = canvas.getContext('2d', { alpha: false });
-    if (!context) {
-      canvas.remove();
-      return;
+    // Disable the older page-level media element so its scroll listener cannot keep issuing
+    // competing seeks in the background. The poster stays visible until the new scrub video is ready.
+    try {
+      legacyVideo.pause();
+      legacyVideo.preload = 'none';
+      legacyVideo.querySelectorAll('source').forEach((item) => item.remove());
+      legacyVideo.removeAttribute('src');
+      legacyVideo.load();
+    } catch {
+      // Poster fallback remains available.
     }
 
-    context.imageSmoothingEnabled = true;
-    context.imageSmoothingQuality = 'high';
+    const video = document.createElement('video');
+    video.className = 'hero-video hero-video-scrub';
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = 'auto';
+    video.disablePictureInPicture = true;
+    video.setAttribute('aria-hidden', 'true');
+    video.style.opacity = '0';
+    video.style.pointerEvents = 'none';
+    video.src = source;
+    legacyVideo.after(video);
 
     let destroyed = false;
     let raf = 0;
-    let desiredFrame = 0;
-    let drawnFrame = -1;
+    let ready = false;
+    let seeking = false;
+    let pendingTime = 0;
+    let lastSeekAt = 0;
     let lastPhase = -1;
-    const cache = new Map<number, HTMLImageElement>();
-    const loading = new Set<number>();
+    let firstFrameShown = false;
 
-    try {
+    const reveal = () => {
+      if (destroyed || firstFrameShown) return;
+      firstFrameShown = true;
+      video.style.opacity = '1';
+      legacyVideo.style.opacity = '0';
+    };
+
+    const applyPendingSeek = () => {
+      if (destroyed || reduceMotion || !ready || seeking || !Number.isFinite(video.duration) || video.duration <= 0) return;
+
+      const target = Math.max(0, Math.min(video.duration - 0.03, pendingTime));
+      if (Math.abs(video.currentTime - target) < 0.025) {
+        reveal();
+        return;
+      }
+
+      const now = performance.now();
+      const minimumGap = isMobile ? 42 : 26;
+      if (now - lastSeekAt < minimumGap) return;
+
+      seeking = true;
+      lastSeekAt = now;
+      try {
+        video.currentTime = target;
+      } catch {
+        seeking = false;
+      }
+    };
+
+    const onSeeked = () => {
+      seeking = false;
+      reveal();
+      if (Math.abs(video.currentTime - pendingTime) > (isMobile ? 0.055 : 0.035)) {
+        applyPendingSeek();
+      }
+    };
+
+    const onMetadata = () => {
+      ready = true;
       video.pause();
-      video.preload = 'none';
-      video.querySelectorAll('source').forEach((source) => source.remove());
-      video.removeAttribute('src');
-      video.style.willChange = 'auto';
-      video.load();
-    } catch {
-      // The poster stays visible until the first sprite sheet is ready.
-    }
-
-    const resizeCanvas = () => {
-      const rect = stage.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, config.dprCap);
-      const nextWidth = Math.max(1, Math.min(Math.round(rect.width * dpr), config.maxCanvasWidth));
-      const nextHeight = Math.max(1, Math.min(Math.round(rect.height * dpr), config.maxCanvasHeight));
-      if (canvas.width !== nextWidth || canvas.height !== nextHeight) {
-        canvas.width = nextWidth;
-        canvas.height = nextHeight;
-        context.imageSmoothingEnabled = true;
-        context.imageSmoothingQuality = 'high';
-        drawnFrame = -1;
-      }
+      applyPendingSeek();
     };
 
-    const pruneCache = (center: number) => {
-      cache.forEach((image, index) => {
-        if (Math.abs(index - center) > 1) {
-          image.src = '';
-          cache.delete(index);
-        }
-      });
-    };
-
-    const drawFrame = (frameIndex: number) => {
-      const safeFrame = Math.max(0, Math.min(config.totalFrames - 1, frameIndex));
-      const sheetIndex = Math.min(config.sheets.length - 1, Math.floor(safeFrame / FRAMES_PER_SHEET));
-      const image = cache.get(sheetIndex);
-      if (!image || !image.complete || image.naturalWidth === 0) return false;
-
-      resizeCanvas();
-
-      const localFrame = safeFrame % FRAMES_PER_SHEET;
-      const column = localFrame % SHEET_COLUMNS;
-      const row = Math.floor(localFrame / SHEET_COLUMNS);
-      const frameX = column * config.frameWidth;
-      const frameY = row * config.frameHeight;
-
-      const destinationAspect = canvas.width / canvas.height;
-      const sourceAspect = config.frameWidth / config.frameHeight;
-      let sourceX = 0;
-      let sourceY = 0;
-      let sourceWidth = config.frameWidth;
-      let sourceHeight = config.frameHeight;
-
-      if (sourceAspect > destinationAspect) {
-        sourceWidth = config.frameHeight * destinationAspect;
-        sourceX = (config.frameWidth - sourceWidth) * config.focusX;
-      } else if (sourceAspect < destinationAspect) {
-        sourceHeight = config.frameWidth / destinationAspect;
-        sourceY = (config.frameHeight - sourceHeight) * config.focusY;
-      }
-
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(
-        image,
-        frameX + sourceX,
-        frameY + sourceY,
-        sourceWidth,
-        sourceHeight,
-        0,
-        0,
-        canvas.width,
-        canvas.height,
-      );
-
-      drawnFrame = safeFrame;
-      canvas.classList.add('is-ready');
-      video.style.opacity = '0';
-      return true;
-    };
-
-    const loadSheet = (index: number) => {
-      if (index < 0 || index >= config.sheets.length || cache.has(index) || loading.has(index)) return;
-      loading.add(index);
-      const image = new Image();
-      image.decoding = 'async';
-      image.onload = () => {
-        if (destroyed) return;
-        loading.delete(index);
-        cache.set(index, image);
-        const desiredSheet = Math.min(config.sheets.length - 1, Math.floor(desiredFrame / FRAMES_PER_SHEET));
-        if (index === desiredSheet) drawFrame(desiredFrame);
-        pruneCache(desiredSheet);
-      };
-      image.onerror = () => loading.delete(index);
-      image.src = config.sheets[index];
+    const unlock = () => {
+      if (reduceMotion) return;
+      const playback = video.play();
+      if (playback) playback.then(() => video.pause()).catch(() => undefined);
     };
 
     const paint = () => {
@@ -206,45 +115,38 @@ export default function FrameFilmEngine() {
         lastPhase = phase;
       }
 
-      desiredFrame = reducedMotion ? 0 : Math.round(progress * (config.totalFrames - 1));
-      const sheetIndex = Math.min(config.sheets.length - 1, Math.floor(desiredFrame / FRAMES_PER_SHEET));
-      loadSheet(sheetIndex);
-
-      const localFrame = desiredFrame % FRAMES_PER_SHEET;
-      if (localFrame >= 7) loadSheet(sheetIndex + 1);
-      if (localFrame <= 3) loadSheet(sheetIndex - 1);
-
-      if (drawnFrame !== desiredFrame) drawFrame(desiredFrame);
+      if (ready && Number.isFinite(video.duration) && video.duration > 0) {
+        pendingTime = reduceMotion ? 0 : progress * video.duration;
+        applyPendingSeek();
+      }
     };
 
     const queuePaint = () => {
       if (!raf) raf = requestAnimationFrame(paint);
     };
 
-    const onResize = () => {
-      resizeCanvas();
-      queuePaint();
-    };
-
-    loadSheet(0);
-    loadSheet(1);
-    resizeCanvas();
-    queuePaint();
-
+    video.addEventListener('loadedmetadata', onMetadata);
+    video.addEventListener('seeked', onSeeked);
     window.addEventListener('scroll', queuePaint, { passive: true });
-    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('resize', queuePaint, { passive: true });
+    window.addEventListener('touchstart', unlock, { once: true, passive: true });
+    window.addEventListener('pointerdown', unlock, { once: true, passive: true });
+    queuePaint();
 
     return () => {
       destroyed = true;
+      video.removeEventListener('loadedmetadata', onMetadata);
+      video.removeEventListener('seeked', onSeeked);
       window.removeEventListener('scroll', queuePaint);
-      window.removeEventListener('resize', onResize);
+      window.removeEventListener('resize', queuePaint);
+      window.removeEventListener('touchstart', unlock);
+      window.removeEventListener('pointerdown', unlock);
       if (raf) cancelAnimationFrame(raf);
-      cache.forEach((image) => {
-        image.src = '';
-      });
-      cache.clear();
-      canvas.remove();
-      video.style.opacity = '';
+      video.pause();
+      video.removeAttribute('src');
+      video.load();
+      video.remove();
+      legacyVideo.style.opacity = '';
     };
   }, []);
 
