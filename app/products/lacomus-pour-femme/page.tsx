@@ -1,5 +1,5 @@
 import FadeContent from '../../components/react-bits/FadeContent';
-import GlareHover from '../../components/react-bits/GlareHover';
+import DepthCarousel from '../../components/react-bits/DepthCarousel';
 import styles from '../lacomus-pour-homme/product.module.css';
 
 const OFFICIAL_PRODUCT = 'https://lacomusph.com/products/lacomus-pour-femme';
@@ -11,6 +11,11 @@ const productImages = [
   'https://lacomusph.com/cdn/shop/files/lacomus-lifestyle-photography-07.jpg?v=1777665185&width=2400',
   'https://lacomusph.com/cdn/shop/files/lacomus-brand-lifestyle-social-media-photo.png?v=1777665175&width=2400',
 ];
+
+const carouselItems = productImages.slice(0, 4).map((image, index) => ({
+  image,
+  alt: `LACOMUS Pour Femme product view ${index + 1}`,
+}));
 
 const notes = [
   { label: 'Open', value: 'Almond · Coffee · Bergamot · Lemon · Pink Pepper · Cloves · Orange Blossom' },
@@ -34,24 +39,28 @@ export default function PourFemmePage() {
       </header>
 
       <section className={styles.hero}>
-        <div className={styles.gallery} aria-label="LACOMUS Pour Femme product gallery">
-          {productImages.slice(0, 4).map((src, index) => (
-            <figure className={`${styles.galleryCard} ${index === 0 ? styles.galleryPrimary : ''}`} key={src}>
-              <GlareHover
-                width="100%"
-                height="100%"
-                background="transparent"
-                borderColor="transparent"
-                borderRadius="0"
-                glareOpacity={0.09}
-                glareSize={180}
-                transitionDuration={850}
-              >
-                <img src={src} alt={`LACOMUS Pour Femme product view ${index + 1}`} loading={index === 0 ? 'eager' : 'lazy'} />
-              </GlareHover>
-              <span>{String(index + 1).padStart(2, '0')}</span>
-            </figure>
-          ))}
+        <div aria-label="LACOMUS Pour Femme product gallery">
+          <DepthCarousel
+            items={carouselItems}
+            cardWidth={470}
+            cardHeight={600}
+            radius={4}
+            tint="#2a090a"
+            depth={205}
+            spread={96}
+            tilt={18}
+            tiltDirection="right"
+            perspective={1600}
+            visibleCards={3}
+            falloff={0.17}
+            blur={2.6}
+            duration={760}
+            ease="power3.out"
+            loop
+            showControls
+            showIndicators
+            wheelNavigation={false}
+          />
         </div>
 
         <aside className={styles.productPanel}>
