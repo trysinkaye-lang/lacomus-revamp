@@ -7,6 +7,12 @@ const HERO_VIDEO = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalL
 const HERO_POSTER = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/3a2421a2-54a6-4574-9e9d-d883afdd3644.png';
 const JAMES_IMAGE = 'https://lacomusph.com/cdn/shop/files/lacomus-lifestyle-photography-10.jpg?v=1777665204&width=2200';
 
+const productCampaign: Record<string, string> = {
+  blue: 'https://d8j0ntlcm91z4.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/hf_20260908_091944_bc61ad67-edb4-4e67-af1b-0535544a8d7f.png',
+  pink: 'https://d8j0ntlcm91z4.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/hf_20260908_092605_eb19eae5-b1a7-48e7-944e-59bd66bd136e.png',
+  emerald: 'https://d8j0ntlcm91z4.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/hf_20260908_092606_e074ed4d-efdd-42b6-b489-4430a968ccce.png',
+};
+
 const gallery = [
   {
     src: 'https://lacomusph.com/cdn/shop/files/HRS07386.jpg?v=1783715351&width=2200',
@@ -114,8 +120,8 @@ export default function Home() {
       if (!reduceMotion && video.readyState >= 1 && Number.isFinite(video.duration) && video.duration > 0) {
         const target = Math.min(video.duration - 0.04, progress * video.duration);
         const now = performance.now();
-        const minimumGap = coarsePointer ? 46 : 24;
-        const minimumDelta = coarsePointer ? 0.055 : 0.025;
+        const minimumGap = coarsePointer ? 58 : 28;
+        const minimumDelta = coarsePointer ? 0.075 : 0.03;
 
         if (Math.abs(target - lastSeek) >= minimumDelta && now - lastSeekAt >= minimumGap) {
           try {
@@ -179,6 +185,7 @@ export default function Home() {
       <header className="topbar shell">
         <a className="wordmark" href="#film">LACOMUS</a>
         <nav aria-label="Primary navigation">
+          <a href="#collection">Collection</a>
           <a href="#james">James Torres</a>
           <a href="#gallery">Gallery</a>
           <button type="button" onClick={() => setChatOpen(true)}>Concierge</button>
@@ -214,7 +221,7 @@ export default function Home() {
             <div className="film-copy-step film-copy-step-2">
               <span>LACOMUS / SILENT LUXURY</span>
               <h1>Leave a trace.</h1>
-              <p>Scroll once more to enter the brand story.</p>
+              <p>Scroll once more to enter the collection.</p>
             </div>
           </div>
 
@@ -225,8 +232,37 @@ export default function Home() {
         </div>
       </section>
 
+      <section id="collection" className="signature-panels" aria-label="LACOMUS signature fragrances">
+        {products.map((product) => (
+          <article className={`signature-panel signature-panel-${product.id}`} key={product.id}>
+            <img
+              src={productCampaign[product.id] ?? product.image}
+              alt={`${product.name} campaign`}
+              loading="lazy"
+            />
+            <div className="signature-panel-shade" aria-hidden="true" />
+            <div className="signature-panel-copy shell">
+              <div>
+                <p className="signature-kicker">{product.subtitle.replace(' · Eau de Parfum', '')}</p>
+                <h2>{product.name.replace('Lacomus ', '')}</h2>
+                <p className="signature-mood">{product.mood}</p>
+                <p className="signature-description">{product.description}</p>
+                <div className="signature-price">
+                  <strong>{peso(product.price)}</strong>
+                  {product.compareAt ? <del>{peso(product.compareAt)}</del> : null}
+                </div>
+                <div className="signature-actions">
+                  <a className="signature-button" href={product.url} target="_blank" rel="noreferrer">Shop fragrance</a>
+                  <a className="signature-details" href={product.url} target="_blank" rel="noreferrer">Full details ↗</a>
+                </div>
+              </div>
+            </div>
+          </article>
+        ))}
+      </section>
+
       <section id="james" className="james-section">
-        <img src={JAMES_IMAGE} alt="LACOMUS luxury fragrance lifestyle campaign" loading="eager" />
+        <img src={JAMES_IMAGE} alt="LACOMUS luxury fragrance lifestyle campaign" loading="lazy" />
         <div className="james-shade" aria-hidden="true" />
         <div className="james-copy shell">
           <p>PORTRAIT / LACOMUS</p>
