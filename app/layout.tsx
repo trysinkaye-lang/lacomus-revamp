@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
+import FrameFilmEngine from './components/FrameFilmEngine';
 import './globals.css';
 import './visual-fixes.css';
 import './product-sections.css';
 import './james-clean.css';
 import './react-bits.css';
+import './frame-film.css';
 
 export const metadata: Metadata = {
   title: 'LACOMUS — Silent Luxury',
@@ -20,7 +22,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <FrameFilmEngine />
+      </body>
     </html>
   );
 }
