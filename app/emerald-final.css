@@ -5,7 +5,7 @@
   position:absolute;
   inset:0;
   z-index:0;
-  background-image:url('https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/99f0e9a0-5d8f-40a8-a92e-a8fe991d7ac3.png');
+  background-image:url('https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/01e6a409-e3c5-42f8-ba82-70e4f73593d6.png');
   background-size:cover;
   background-repeat:no-repeat;
   background-position:center center;
@@ -18,13 +18,13 @@
   .signature-panel-emerald::before{
     height:62svh;
     bottom:auto;
-    background-position:64% center;
+    background-position:66% center;
   }
 }
 
 @media(max-width:560px){
   .signature-panel-emerald::before{
     height:56svh;
-    background-position:67% center;
+    background-position:70% center;
   }
 }
