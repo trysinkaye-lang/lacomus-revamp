@@ -18,6 +18,15 @@ const carouselItems = productImages.slice(0, 4).map((image, index) => ({
   alt: `LACOMUS Pink Sapphire product portrait ${index + 1}`,
 }));
 
+const pinkSapphireStyle = {
+  display: 'block',
+  backgroundImage: 'linear-gradient(135deg,#ffe8ef 0%,#ffc2d2 18%,#f28aaa 42%,#df5b88 68%,#a92f5d 100%)',
+  WebkitBackgroundClip: 'text',
+  backgroundClip: 'text',
+  color: 'transparent',
+  textShadow: '0 0 24px rgba(232,93,140,.13)',
+} as const;
+
 const scentActs = [
   {
     number: 'ACT I / THE ARRIVAL',
@@ -86,9 +95,9 @@ export default function PourFemmePage() {
           <FadeContent blur={false} duration={0.75} threshold={0.12}>
             <div className={styles.productPanelInner}>
               <div className={styles.kicker}>POUR FEMME / EAU DE PARFUM</div>
-              <h1 className={styles.productTitle}>
-                <span className={styles.titlePrimary}>Pink</span>
-                <span className={styles.titleGemPink}>Sapphire</span>
+              <h1>
+                <span style={{ display: 'block' }}>Pink</span>
+                <span style={pinkSapphireStyle}>Sapphire</span>
               </h1>
               <p className={styles.mood}>Elegant · Warm · Captivating</p>
 
