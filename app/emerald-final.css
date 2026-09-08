@@ -19,7 +19,13 @@
 
 .signature-panel-emerald .signature-panel-copy{z-index:2}
 .signature-panel-emerald .signature-panel-copy>div{text-shadow:none}
-.signature-panel-emerald h2{text-shadow:none}
+.signature-panel-emerald h2{
+  background:linear-gradient(135deg,#d7f6de 0%,#86d99a 20%,#32a85a 47%,#126c36 73%,#06351d 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  text-shadow:0 0 22px rgba(36,146,79,.12);
+}
 
 @media(max-width:900px){
   .signature-panel-emerald::before{
