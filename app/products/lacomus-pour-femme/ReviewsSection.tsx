@@ -1,3 +1,4 @@
+import ReviewsExplorer, { type ReviewItem, type ReviewPicture } from './ReviewsExplorer';
 import styles from './reviews.module.css';
 
 const OFFICIAL_PRODUCT = 'https://lacomusph.com/products/lacomus-pour-femme';
@@ -5,22 +6,7 @@ const PRODUCT_ID = 8873526460552;
 const REVIEW_COUNT = 355;
 const AVERAGE_RATING = 4.84;
 
-type ReviewPicture = {
-  original?: string;
-  small?: string;
-  compact?: string;
-  huge?: string;
-};
-
-type Review = {
-  uuid: string;
-  rating: number;
-  body?: string;
-  reviewer_name?: string;
-  reviewer_initial?: string;
-  verified_buyer?: boolean;
-  created_at?: string;
-  pictures_urls?: ReviewPicture[];
+type Review = ReviewItem & {
   product_id?: number;
 };
 
@@ -54,32 +40,17 @@ async function getReviews(): Promise<Review[]> {
   }
 }
 
-function formatDate(value?: string) {
-  if (!value) return '';
-  return new Intl.DateTimeFormat('en-PH', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'Asia/Manila',
-  }).format(new Date(value));
-}
-
-function stars(rating: number) {
-  return '★★★★★'.slice(0, Math.max(0, Math.min(5, Math.round(rating))));
-}
-
 export default async function ReviewsSection() {
   const reviews = await getReviews();
-  const visibleReviews = reviews.slice(0, 8);
   const media = reviews
     .flatMap((review) =>
-      (review.pictures_urls ?? []).map((picture) => ({
+      (review.pictures_urls ?? []).map((picture: ReviewPicture) => ({
         src: picture.huge || picture.original || picture.small || '',
         reviewer: review.reviewer_name || 'LACOMUS customer',
       })),
     )
     .filter((item) => item.src)
-    .slice(0, 5);
+    .slice(0, 6);
 
   return (
     <section className={styles.section} aria-labelledby="customer-voices-title">
@@ -97,49 +68,35 @@ export default async function ReviewsSection() {
         </div>
 
         <div className={styles.context}>
-          <p>Real feedback from the LACOMUS Pour Femme review feed.</p>
-          <span>Reviews marked “Verified Buyer” are identified as verified purchases by the review provider.</span>
+          <p>Real feedback from women wearing Pink Sapphire.</p>
+          <span>The design now follows familiar beauty-commerce review patterns: verified-purchase trust signals, customer media, filters, sorting, and readable review cards.</span>
           <a href={OFFICIAL_PRODUCT} target="_blank" rel="noreferrer">View all {REVIEW_COUNT} on LACOMUS ↗</a>
         </div>
       </div>
 
       {media.length > 0 && (
-        <div className={styles.mediaRail} aria-label="Customer review photos">
-          {media.map((item, index) => (
-            <figure key={`${item.src}-${index}`} className={styles.mediaCard}>
-              <img src={item.src} alt={`Customer review photo from ${item.reviewer}`} loading="lazy" />
-              <figcaption>Customer photo · {String(index + 1).padStart(2, '0')}</figcaption>
-            </figure>
-          ))}
+        <div className={styles.mediaBlock}>
+          <div className={styles.mediaHeading}>
+            <div>
+              <span>COMMUNITY GALLERY</span>
+              <h3>Seen in the wild.</h3>
+            </div>
+            <p>Customer-uploaded photos from the live LACOMUS review feed.</p>
+          </div>
+
+          <div className={styles.mediaRail} aria-label="Customer review photos">
+            {media.map((item, index) => (
+              <figure key={`${item.src}-${index}`} className={styles.mediaCard}>
+                <img src={item.src} alt={`Customer review photo from ${item.reviewer}`} loading="lazy" />
+                <figcaption>Customer photo · {String(index + 1).padStart(2, '0')}</figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
       )}
 
-      {visibleReviews.length > 0 ? (
-        <div className={styles.reviewGrid}>
-          {visibleReviews.map((review, index) => (
-            <article className={styles.reviewCard} key={review.uuid}>
-              <div className={styles.cardTop}>
-                <span className={styles.cardStars} aria-label={`${review.rating} out of 5 stars`}>
-                  {stars(review.rating)}
-                </span>
-                <span className={styles.index}>{String(index + 1).padStart(2, '0')}</span>
-              </div>
-
-              <blockquote>“{review.body || 'Customer rating submitted for LACOMUS Pour Femme.'}”</blockquote>
-
-              <footer>
-                <div className={styles.avatar} aria-hidden="true">
-                  {(review.reviewer_initial || review.reviewer_name?.[0] || 'L').toUpperCase()}
-                </div>
-                <div className={styles.reviewer}>
-                  <strong>{review.reviewer_name || 'Anonymous'}</strong>
-                  <span>{review.verified_buyer ? 'Verified Buyer' : 'Customer Review'}</span>
-                </div>
-                <time dateTime={review.created_at}>{formatDate(review.created_at)}</time>
-              </footer>
-            </article>
-          ))}
-        </div>
+      {reviews.length > 0 ? (
+        <ReviewsExplorer reviews={reviews} totalCount={REVIEW_COUNT} officialProduct={OFFICIAL_PRODUCT} />
       ) : (
         <div className={styles.fallback}>
           <p>The live review feed is temporarily unavailable.</p>
