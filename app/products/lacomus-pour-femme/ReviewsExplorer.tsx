@@ -1,7 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import SpotlightCard from '../../components/react-bits/SpotlightCard';
+import { useEffect, useMemo, useState } from 'react';
 import enhanced from './reviews-enhanced.module.css';
 
 export type ReviewPicture = {
@@ -51,72 +50,33 @@ function reviewPhoto(review: ReviewItem) {
   return picture?.huge || picture?.original || picture?.small || '';
 }
 
-function ReviewCard({ review, index, clone = false }: { review: ReviewItem; index: number; clone?: boolean }) {
-  const pictureSrc = reviewPhoto(review);
-
-  return (
-    <SpotlightCard
-      className={enhanced.reviewTickerCard}
-      spotlightColor={index % 2 === 0 ? 'rgba(217,185,80,.11)' : 'rgba(177,63,77,.12)'}
-    >
-      <article className={enhanced.compactCard} aria-hidden={clone || undefined}>
-        <div className={enhanced.compactTop}>
-          <span className={enhanced.compactStars} aria-label={`${review.rating} out of 5 stars`}>
-            {stars(review.rating)}
-          </span>
-          {pictureSrc && (
-            <img
-              className={enhanced.reviewThumb}
-              src={pictureSrc}
-              alt={clone ? '' : `Review photo from ${review.reviewer_name || 'a LACOMUS customer'}`}
-              loading="lazy"
-            />
-          )}
-        </div>
-
-        <blockquote>“{review.body || 'Customer rating submitted for LACOMUS Pour Femme.'}”</blockquote>
-
-        <footer>
-          <div className={enhanced.avatar} aria-hidden="true">
-            {(review.reviewer_initial || review.reviewer_name?.[0] || 'L').toUpperCase()}
-          </div>
-          <div className={enhanced.reviewer}>
-            <strong>{review.reviewer_name || 'Anonymous'}</strong>
-            <span className={review.verified_buyer ? enhanced.verified : enhanced.unverified}>
-              {review.verified_buyer ? '✓ Verified Buyer' : 'Customer Review'}
-            </span>
-          </div>
-          <time dateTime={review.created_at}>{formatDate(review.created_at)}</time>
-        </footer>
-      </article>
-    </SpotlightCard>
-  );
-}
-
-function MovingRow({ reviews, reverse = false, row }: { reviews: ReviewItem[]; reverse?: boolean; row: number }) {
-  if (reviews.length === 0) return null;
-
-  return (
-    <div className={enhanced.marqueeViewport} aria-label={`Moving customer reviews row ${row}`}>
-      <div className={`${enhanced.marqueeTrack} ${reverse ? enhanced.reverse : enhanced.forward}`}>
-        <div className={enhanced.marqueeGroup}>
-          {reviews.map((review, index) => (
-            <ReviewCard key={`row-${row}-${review.uuid}`} review={review} index={index} />
-          ))}
-        </div>
-        <div className={enhanced.marqueeGroup} aria-hidden="true">
-          {reviews.map((review, index) => (
-            <ReviewCard key={`row-${row}-clone-${review.uuid}`} review={review} index={index} clone />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function ReviewsExplorer({ reviews, totalCount, officialProduct }: Props) {
+  const displayReviews = useMemo(
+    () => reviews.filter((review) => (review.body?.trim().length ?? 0) > 0).slice(0, 8),
+    [reviews],
+  );
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [filter, setFilter] = useState<Filter>('all');
   const [sort, setSort] = useState<Sort>('newest');
+
+  useEffect(() => {
+    if (paused || drawerOpen || displayReviews.length < 2) return;
+    const timer = window.setInterval(() => {
+      setActive((current) => (current + 1) % displayReviews.length);
+    }, 6500);
+    return () => window.clearInterval(timer);
+  }, [displayReviews.length, drawerOpen, paused]);
+
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setDrawerOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [drawerOpen]);
 
   const counts = useMemo(() => ({
     all: reviews.length,
@@ -126,7 +86,7 @@ export default function ReviewsExplorer({ reviews, totalCount, officialProduct }
     four: reviews.filter((review) => Math.round(review.rating) === 4).length,
   }), [reviews]);
 
-  const filtered = useMemo(() => {
+  const drawerReviews = useMemo(() => {
     let next = reviews.filter((review) => {
       if (filter === 'verified') return Boolean(review.verified_buyer);
       if (filter === 'media') return (review.pictures_urls?.length ?? 0) > 0;
@@ -144,54 +104,127 @@ export default function ReviewsExplorer({ reviews, totalCount, officialProduct }
     return next;
   }, [filter, reviews, sort]);
 
-  const moving = filtered.slice(0, 14);
-  const rowOne = moving.filter((_, index) => index % 2 === 0);
-  const alternateRow = moving.filter((_, index) => index % 2 === 1);
-  const rowTwo = alternateRow.length > 0 ? alternateRow : rowOne;
+  const review = displayReviews[active];
+  const go = (direction: number) => {
+    if (displayReviews.length === 0) return;
+    setActive((current) => (current + direction + displayReviews.length) % displayReviews.length);
+  };
+
+  if (!review) {
+    return (
+      <div className={enhanced.emptyState}>
+        <p>Customer reviews are temporarily unavailable.</p>
+        <a href={officialProduct} target="_blank" rel="noreferrer">Read reviews on LACOMUS ↗</a>
+      </div>
+    );
+  }
 
   return (
     <div className={enhanced.explorer}>
-      <div className={enhanced.reviewToolbar}>
-        <div className={enhanced.filterGroup} aria-label="Filter recent reviews">
-          <button className={filter === 'all' ? enhanced.activeFilter : ''} onClick={() => setFilter('all')} type="button">All <span>{counts.all}</span></button>
-          <button className={filter === 'verified' ? enhanced.activeFilter : ''} onClick={() => setFilter('verified')} type="button">Verified <span>{counts.verified}</span></button>
-          <button className={filter === 'media' ? enhanced.activeFilter : ''} onClick={() => setFilter('media')} type="button">With photos <span>{counts.media}</span></button>
-          <button className={filter === '5' ? enhanced.activeFilter : ''} onClick={() => setFilter('5')} type="button">5 stars <span>{counts.five}</span></button>
-          <button className={filter === '4' ? enhanced.activeFilter : ''} onClick={() => setFilter('4')} type="button">4 stars <span>{counts.four}</span></button>
+      <section
+        className={enhanced.reviewStage}
+        aria-label="Featured customer review"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        <div className={enhanced.reviewStageTop}>
+          <span>CUSTOMER NOTE / {String(active + 1).padStart(2, '0')}</span>
+          <span className={enhanced.stars}>{stars(review.rating)}</span>
         </div>
 
-        <label className={enhanced.sortControl}>
-          <span>Sort</span>
-          <select value={sort} onChange={(event) => setSort(event.target.value as Sort)}>
-            <option value="newest">Most recent</option>
-            <option value="highest">Highest rating</option>
-            <option value="lowest">Lowest rating</option>
-          </select>
-        </label>
-      </div>
+        <div className={enhanced.reviewBody} key={review.uuid}>
+          {reviewPhoto(review) && (
+            <figure className={enhanced.reviewPhoto}>
+              <img src={reviewPhoto(review)} alt={`Customer photo from ${review.reviewer_name || 'a LACOMUS customer'}`} loading="lazy" />
+            </figure>
+          )}
 
-      <div className={enhanced.feedMeta}>
-        <span>{moving.length} recent matching reviews in motion</span>
-        <span>{totalCount} total reviews on the official LACOMUS product page</span>
-      </div>
-
-      {moving.length > 0 ? (
-        <div className={enhanced.motionStage}>
-          <div className={enhanced.motionHeading}>
-            <span>CUSTOMER VOICES IN MOTION</span>
-            <span>Hover to pause · swipe naturally on mobile</span>
+          <div className={enhanced.reviewCopy}>
+            <blockquote>“{review.body}”</blockquote>
+            <footer>
+              <div>
+                <strong>{review.reviewer_name || 'Anonymous'}</strong>
+                <span className={review.verified_buyer ? enhanced.verified : enhanced.unverified}>
+                  {review.verified_buyer ? 'Verified Buyer' : 'Customer Review'}
+                </span>
+              </div>
+              <time dateTime={review.created_at}>{formatDate(review.created_at)}</time>
+            </footer>
           </div>
-          <MovingRow reviews={rowOne} row={1} />
-          <MovingRow reviews={rowTwo} reverse row={2} />
         </div>
-      ) : (
-        <div className={enhanced.emptyState}>No recent reviews match this filter.</div>
-      )}
 
-      <div className={enhanced.reviewActions}>
-        <span>LIVE / LACOMUS + JUDGE.ME</span>
-        <a href={officialProduct} target="_blank" rel="noreferrer">View all {totalCount} reviews on LACOMUS ↗</a>
+        <div className={enhanced.reviewControls}>
+          <button type="button" onClick={() => go(-1)} aria-label="Previous review">←</button>
+          <div className={enhanced.progress} aria-label={`Review ${active + 1} of ${displayReviews.length}`}>
+            {displayReviews.map((item, index) => (
+              <button
+                key={item.uuid}
+                type="button"
+                className={index === active ? enhanced.activeProgress : ''}
+                onClick={() => setActive(index)}
+                aria-label={`Show review ${index + 1}`}
+              />
+            ))}
+          </div>
+          <span>{String(active + 1).padStart(2, '0')} / {String(displayReviews.length).padStart(2, '0')}</span>
+          <button type="button" onClick={() => go(1)} aria-label="Next review">→</button>
+        </div>
+      </section>
+
+      <div className={enhanced.reviewFooterActions}>
+        <p>Real customer feedback, kept quiet enough to let the fragrance remain the focus.</p>
+        <button type="button" onClick={() => setDrawerOpen(true)}>Read all reviews</button>
       </div>
+
+      {drawerOpen && (
+        <div className={enhanced.drawerBackdrop} role="presentation" onMouseDown={() => setDrawerOpen(false)}>
+          <aside className={enhanced.drawer} role="dialog" aria-modal="true" aria-label="All customer reviews" onMouseDown={(event) => event.stopPropagation()}>
+            <div className={enhanced.drawerHeader}>
+              <div>
+                <span>CUSTOMER ARCHIVE</span>
+                <h3>{totalCount} reviews</h3>
+              </div>
+              <button type="button" onClick={() => setDrawerOpen(false)} aria-label="Close reviews">×</button>
+            </div>
+
+            <div className={enhanced.drawerToolbar}>
+              <div className={enhanced.filterGroup}>
+                <button className={filter === 'all' ? enhanced.activeFilter : ''} onClick={() => setFilter('all')} type="button">All <span>{counts.all}</span></button>
+                <button className={filter === 'verified' ? enhanced.activeFilter : ''} onClick={() => setFilter('verified')} type="button">Verified <span>{counts.verified}</span></button>
+                <button className={filter === 'media' ? enhanced.activeFilter : ''} onClick={() => setFilter('media')} type="button">Photos <span>{counts.media}</span></button>
+                <button className={filter === '5' ? enhanced.activeFilter : ''} onClick={() => setFilter('5')} type="button">5★ <span>{counts.five}</span></button>
+                <button className={filter === '4' ? enhanced.activeFilter : ''} onClick={() => setFilter('4')} type="button">4★ <span>{counts.four}</span></button>
+              </div>
+              <select value={sort} onChange={(event) => setSort(event.target.value as Sort)} aria-label="Sort reviews">
+                <option value="newest">Most recent</option>
+                <option value="highest">Highest rating</option>
+                <option value="lowest">Lowest rating</option>
+              </select>
+            </div>
+
+            <div className={enhanced.drawerList}>
+              {drawerReviews.map((item) => (
+                <article className={enhanced.drawerReview} key={item.uuid}>
+                  <div className={enhanced.drawerReviewTop}>
+                    <span className={enhanced.stars}>{stars(item.rating)}</span>
+                    <time dateTime={item.created_at}>{formatDate(item.created_at)}</time>
+                  </div>
+                  {reviewPhoto(item) && <img src={reviewPhoto(item)} alt={`Customer review from ${item.reviewer_name || 'a LACOMUS customer'}`} loading="lazy" />}
+                  <p>“{item.body || 'Customer rating submitted for LACOMUS Pour Femme.'}”</p>
+                  <div className={enhanced.drawerReviewer}>
+                    <strong>{item.reviewer_name || 'Anonymous'}</strong>
+                    <span className={item.verified_buyer ? enhanced.verified : enhanced.unverified}>
+                      {item.verified_buyer ? 'Verified Buyer' : 'Customer Review'}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <a className={enhanced.officialLink} href={officialProduct} target="_blank" rel="noreferrer">View all {totalCount} on the official LACOMUS store ↗</a>
+          </aside>
+        </div>
+      )}
     </div>
   );
 }
