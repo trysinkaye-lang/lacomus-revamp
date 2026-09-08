@@ -24,6 +24,14 @@ const notes = [
   { label: 'Trail', value: 'Cedarwood · Amber · Vanilla · Musk' },
 ];
 
+const sapphireBlueStyle = {
+  backgroundImage: 'linear-gradient(135deg,#d8edff 0%,#8fc6ff 18%,#4b8dff 45%,#2256c9 72%,#102b72 100%)',
+  WebkitBackgroundClip: 'text',
+  backgroundClip: 'text',
+  color: 'transparent',
+  textShadow: '0 0 24px rgba(70,126,255,.14)',
+} as const;
+
 export default function PourHommePage() {
   return (
     <main className={styles.page}>
@@ -67,7 +75,10 @@ export default function PourHommePage() {
         <aside className={styles.productPanel}>
           <FadeContent blur={false} duration={0.7} threshold={0.12}>
             <div className={styles.kicker}>POUR HOMME / EAU DE PARFUM</div>
-            <h1>Blue<br />Sapphire</h1>
+            <h1>
+              <span>Blue</span><br />
+              <span style={sapphireBlueStyle}>Sapphire</span>
+            </h1>
             <p className={styles.mood}>Fresh · Clean · Sporty · Masculine</p>
 
             <div className={styles.rating}>
