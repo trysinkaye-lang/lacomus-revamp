@@ -5,26 +5,34 @@
   position:absolute;
   inset:0;
   z-index:0;
-  background-image:url('https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/01e6a409-e3c5-42f8-ba82-70e4f73593d6.png');
+  background-image:url('https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/e927eb77-cc83-4c5a-9768-ec1cc5ed3a62.png');
   background-size:cover;
   background-repeat:no-repeat;
   background-position:center center;
+  transform:none;
 }
 
-.signature-panel-emerald .signature-panel-shade{z-index:1}
+.signature-panel-emerald .signature-panel-shade{
+  z-index:1;
+  background:linear-gradient(90deg,rgba(2,7,5,.72) 0%,rgba(2,7,5,.48) 28%,rgba(2,7,5,.12) 49%,rgba(2,7,5,0) 65%),linear-gradient(0deg,rgba(2,6,4,.20),transparent 48%);
+}
+
 .signature-panel-emerald .signature-panel-copy{z-index:2}
+.signature-panel-emerald .signature-panel-copy>div{text-shadow:none}
+.signature-panel-emerald h2{text-shadow:none}
 
 @media(max-width:900px){
   .signature-panel-emerald::before{
     height:62svh;
     bottom:auto;
-    background-position:66% center;
+    background-size:cover;
+    background-position:70% center;
   }
 }
 
 @media(max-width:560px){
   .signature-panel-emerald::before{
     height:56svh;
-    background-position:70% center;
+    background-position:72% center;
   }
 }
