@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import './visual-fixes.css';
 
 export const metadata: Metadata = {
   title: 'LACOMUS — Silent Luxury',
