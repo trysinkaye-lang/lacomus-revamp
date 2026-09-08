@@ -30,7 +30,7 @@ export default function FragranceCategories() {
       >
         <a
           className="category-card category-card-homme"
-          href="#fragrance-blue"
+          href="/products/lacomus-pour-homme"
           onMouseEnter={() => setActive('homme')}
           onFocus={() => setActive('homme')}
           onBlur={() => setActive(null)}
