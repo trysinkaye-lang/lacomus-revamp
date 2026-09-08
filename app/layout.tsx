@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import './visual-fixes.css';
 import './product-sections.css';
+import './james-clean.css';
 
 export const metadata: Metadata = {
   title: 'LACOMUS — Silent Luxury',
