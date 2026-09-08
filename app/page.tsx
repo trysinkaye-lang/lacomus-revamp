@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from 'react';
 import { peso, products } from './data';
 import FadeContent from './components/react-bits/FadeContent';
 import GlareHover from './components/react-bits/GlareHover';
+import FragranceCategories from './components/FragranceCategories';
 
 const HERO_VIDEO_HQ = 'https://d8j0ntlcm91z4.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/hf_20260908_155625_1f61fd16-4ee0-4d31-9189-da7bc1af548c.mp4';
 const HERO_VIDEO_MOBILE = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3HqpkL4qwLWJklalLjBpcIwd3mK/e853be58-e250-47be-bd1f-28eeecb49c87.mp4';
@@ -248,35 +249,47 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="collection" className="signature-panels" aria-label="LACOMUS signature fragrances">
-        {products.map((product) => (
-          <article className={`signature-panel signature-panel-${product.id}`} key={product.id}>
-            <img
-              src={productCampaign[product.id] ?? product.image}
-              alt={`${product.name} campaign`}
-              loading="lazy"
-            />
-            <div className="signature-panel-shade" aria-hidden="true" />
-            <div className="signature-panel-copy shell">
-              <FadeContent blur={false} duration={0.75} threshold={0.2}>
-                <div>
-                  <p className="signature-kicker">{product.subtitle.replace(' · Eau de Parfum', '')}</p>
-                  <h2>{product.name.replace('Lacomus ', '')}</h2>
-                  <p className="signature-mood">{product.mood}</p>
-                  <p className="signature-description">{product.description}</p>
-                  <div className="signature-price">
-                    <strong>{peso(product.price)}</strong>
-                    {product.compareAt ? <del>{peso(product.compareAt)}</del> : null}
+      <FragranceCategories />
+
+      <section id="fragrances" className="signature-panels" aria-label="LACOMUS signature fragrances">
+        {(['blue', 'emerald', 'pink'] as const).map((productId) => {
+          const product = products.find((item) => item.id === productId);
+          if (!product) return null;
+
+          return (
+            <article
+              id={`fragrance-${product.id}`}
+              className={`signature-panel signature-panel-${product.id}`}
+              key={product.id}
+              style={{ scrollMarginTop: '70px' }}
+            >
+              <img
+                src={productCampaign[product.id] ?? product.image}
+                alt={`${product.name} campaign`}
+                loading="lazy"
+              />
+              <div className="signature-panel-shade" aria-hidden="true" />
+              <div className="signature-panel-copy shell">
+                <FadeContent blur={false} duration={0.75} threshold={0.2}>
+                  <div>
+                    <p className="signature-kicker">{product.subtitle.replace(' · Eau de Parfum', '')}</p>
+                    <h2>{product.name.replace('Lacomus ', '')}</h2>
+                    <p className="signature-mood">{product.mood}</p>
+                    <p className="signature-description">{product.description}</p>
+                    <div className="signature-price">
+                      <strong>{peso(product.price)}</strong>
+                      {product.compareAt ? <del>{peso(product.compareAt)}</del> : null}
+                    </div>
+                    <div className="signature-actions">
+                      <a className="signature-button" href={product.url} target="_blank" rel="noreferrer">Shop fragrance</a>
+                      <a className="signature-details" href={product.url} target="_blank" rel="noreferrer">Full details ↗</a>
+                    </div>
                   </div>
-                  <div className="signature-actions">
-                    <a className="signature-button" href={product.url} target="_blank" rel="noreferrer">Shop fragrance</a>
-                    <a className="signature-details" href={product.url} target="_blank" rel="noreferrer">Full details ↗</a>
-                  </div>
-                </div>
-              </FadeContent>
-            </div>
-          </article>
-        ))}
+                </FadeContent>
+              </div>
+            </article>
+          );
+        })}
       </section>
 
       <section id="gallery" className="gallery-section">
